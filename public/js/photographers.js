@@ -57,6 +57,15 @@ function renderCard(photographer, index) {
     <a class="photographer-card" href="${profileUrl}" style="animation-delay: ${index * 45}ms">
       <div class="cover-wrap">
         ${cover}
+        <div class="cover-overlay">
+          <span class="cover-action-btn">
+            <svg class="cover-action-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Tham khảo thợ ảnh
+          </span>
+        </div>
       </div>
       <div class="card-info">
         <div class="profile-row">
