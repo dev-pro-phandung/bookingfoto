@@ -66,17 +66,11 @@
               autocomplete="off"
             />
           </label>
-          <label class="location-filter">
-            <span aria-hidden="true">⌖</span>
-            <select id="locationSelect" aria-label="Lọc theo khu vực">
-              <option value="">Bộ lọc</option>
-              <option value="Hà Nội">Hà Nội</option>
-              <option value="Quảng Ninh">Quảng Ninh</option>
-              <option value="Bắc Ninh">Bắc Ninh</option>
-              <option value="Hưng Yên">Hưng Yên</option>
-              <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-            </select>
-          </label>
+          <button id="openFilterBtn" class="filter-toggle-btn" type="button" aria-expanded="false" aria-controls="filterDrawer">
+            <span class="filter-btn-icon" aria-hidden="true">⏚</span>
+            <span>Bộ lọc</span>
+            <span id="activeFilterBadge" class="filter-active-count" hidden>0</span>
+          </button>
         </div>
       </section>
 
@@ -87,10 +81,177 @@
         <button class="sort-btn" type="button" data-sort="bookings">
           <span>☷</span> Số buổi chụp
         </button>
+        <button class="sort-btn" type="button" data-sort="favorites">
+          <span>☷</span> Số lượt yêu thích
+        </button>
         <button class="sort-btn" type="button" data-sort="rating">
           <span>≡</span> Số điểm đánh giá
         </button>
       </section>
+
+      <!-- Backdrop & Drawer Bộ lọc tìm kiếm tác giả -->
+      <div id="filterBackdrop" class="filter-backdrop" hidden></div>
+
+      <aside id="filterDrawer" class="filter-drawer" aria-label="Bộ lọc tìm kiếm nhiếp ảnh gia" aria-hidden="true">
+        <div class="filter-drawer-header">
+          <h3>Bộ lọc</h3>
+          <button id="closeFilterBtn" class="filter-close-btn" type="button" aria-label="Đóng bộ lọc">✕</button>
+        </div>
+
+        <div class="filter-drawer-body">
+          <!-- 1. Số năm kinh nghiệm -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">Số năm kinh nghiệm</h4>
+            <div class="filter-options-list">
+              <label class="custom-radio">
+                <input type="radio" name="filter_experience" value="" checked />
+                <span class="radio-mark"></span>
+                <span class="radio-label">Tất cả</span>
+              </label>
+              <label class="custom-radio">
+                <input type="radio" name="filter_experience" value="Dưới 1 năm" />
+                <span class="radio-mark"></span>
+                <span class="radio-label">Dưới 1 năm</span>
+              </label>
+              <label class="custom-radio">
+                <input type="radio" name="filter_experience" value="Từ 1-3 năm" />
+                <span class="radio-mark"></span>
+                <span class="radio-label">Từ 1-3 năm</span>
+              </label>
+              <label class="custom-radio">
+                <input type="radio" name="filter_experience" value="Trên 3 năm" />
+                <span class="radio-mark"></span>
+                <span class="radio-label">Trên 3 năm</span>
+              </label>
+              <label class="custom-radio">
+                <input type="radio" name="filter_experience" value="Trên 5 năm" />
+                <span class="radio-mark"></span>
+                <span class="radio-label">Trên 5 năm</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 2. Ngôn ngữ có thể sử dụng -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">Ngôn ngữ có thể sử dụng</h4>
+            <div class="filter-grid-options">
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_language" value="Tiếng Việt" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Tiếng Việt</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_language" value="Tiếng Anh" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Tiếng Anh</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_language" value="Tiếng Trung" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Tiếng Trung</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_language" value="Tiếng Hàn" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Tiếng Hàn</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_language" value="Tiếng Nhật" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Tiếng Nhật</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. Thể loại chụp -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">Thể loại chụp</h4>
+            <div class="filter-grid-options">
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="Cá nhân" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Cá nhân</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="Cặp đôi" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Cặp đôi</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="Gia đình" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Gia đình</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="Nhóm" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Nhóm</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="HSSV" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">HSSV</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" name="filter_specialty" value="Sự kiện" />
+                <span class="checkbox-mark"></span>
+                <span class="checkbox-label">Sự kiện</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. Giới tính -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">Giới tính</h4>
+            <div class="filter-pills-group" id="genderPills">
+              <button type="button" class="pill-btn active" data-gender="">Tất cả</button>
+              <button type="button" class="pill-btn" data-gender="Nam">♂ Nam</button>
+              <button type="button" class="pill-btn" data-gender="Nữ">♀ Nữ</button>
+              <button type="button" class="pill-btn" data-gender="Khác">⚲ Khác</button>
+            </div>
+          </div>
+
+          <!-- 5. Mô hình làm việc -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">Mô hình làm việc</h4>
+            <div class="filter-pills-group" id="workStylePills">
+              <button type="button" class="pill-btn active" data-workstyle="">Tất cả</button>
+              <button type="button" class="pill-btn" data-workstyle="Cá nhân">👤 Cá nhân</button>
+              <button type="button" class="pill-btn" data-workstyle="Có Ekip">👥 Có Ekip</button>
+            </div>
+          </div>
+
+          <!-- 6. Địa điểm làm việc -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">
+              Địa điểm làm việc <small>(Đã cập nhật theo địa giới hành chính mới)</small>
+            </h4>
+            <select id="drawerLocationSelect" class="filter-select-location">
+              <option value="">Tất cả địa điểm</option>
+              <option value="Hà Nội">Hà Nội</option>
+              <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+              <option value="Đà Nẵng">Đà Nẵng</option>
+              <option value="Hải Phòng">Hải Phòng</option>
+              <option value="Cần Thơ">Cần Thơ</option>
+              <option value="Quảng Ninh">Quảng Ninh</option>
+              <option value="Bắc Ninh">Bắc Ninh</option>
+              <option value="Hưng Yên">Hưng Yên</option>
+              <option value="Hải Dương">Hải Dương</option>
+              <option value="Nam Định">Nam Định</option>
+              <option value="Thái Bình">Thái Bình</option>
+              <option value="Vĩnh Phúc">Vĩnh Phúc</option>
+              <option value="Bình Dương">Bình Dương</option>
+              <option value="Đồng Nai">Đồng Nai</option>
+              <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-drawer-footer">
+          <button id="resetFilterBtn" class="filter-btn-reset" type="button">Bỏ lọc</button>
+          <button id="applyFilterBtn" class="filter-btn-apply" type="button">Lọc</button>
+        </div>
+      </aside>
 
       <section
         id="photographerGrid"

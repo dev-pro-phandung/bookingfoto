@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS photographer_profiles (
   equipment TEXT NOT NULL,
   portfolio_url VARCHAR(255) NULL,
   status ENUM('pending', 'active', 'inactive') NULL DEFAULT 'pending',
+  gender VARCHAR(20) NULL DEFAULT 'Nam',
   PRIMARY KEY (photographer_id),
   UNIQUE KEY uq_photographer_profiles_user (user_id),
   CONSTRAINT fk_photographer_profiles_user

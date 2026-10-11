@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const allowedSorts = {
   newest: "p.photographer_id DESC",
   bookings: "bookingCount DESC",
+  favorites: "p.photographer_id DESC",
   rating: "rating DESC",
 };
 
@@ -47,6 +48,7 @@ const baseSelect = `
     ) AS bookingCount,
     p.location AS locations,
     p.experience AS experience,
+    p.gender AS gender,
     p.status AS status,
     (p.status = 'active') AS isVerified
   FROM photographer_profiles p
@@ -76,6 +78,7 @@ function parseLocations(value) {
 function normalizePhotographer(row) {
   return {
     ...row,
+    gender: row.gender || 'Nam',
     rating: Number(row.rating) || 0,
     reviewCount: Number(row.reviewCount),
     bookingCount: Number(row.bookingCount),
@@ -172,6 +175,11 @@ exports.listPhotographers = async (req, res) => {
   try {
     const search = String(req.query.search || "").trim();
     const location = String(req.query.location || "").trim();
+    const experience = String(req.query.experience || "").trim();
+    const gender = String(req.query.gender || "").trim();
+    const workStyle = String(req.query.workStyle || "").trim();
+    const specialtiesParam = String(req.query.specialties || "").trim();
+    const languagesParam = String(req.query.languages || "").trim();
     const sort = allowedSorts[req.query.sort] ? req.query.sort : "newest";
     const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 6, 1), 24);
@@ -180,14 +188,47 @@ exports.listPhotographers = async (req, res) => {
     const values = [];
 
     if (search) {
-      conditions.push("(u.full_name LIKE ? OR p.equipment LIKE ? OR p.location LIKE ?)");
+      conditions.push("(u.full_name LIKE ? OR p.equipment LIKE ? OR p.location LIKE ? OR COALESCE(d.bio, '') LIKE ? OR COALESCE(d.specialties, '') LIKE ?)");
       const searchValue = `%${search}%`;
-      values.push(searchValue, searchValue, searchValue);
+      values.push(searchValue, searchValue, searchValue, searchValue, searchValue);
     }
 
-    if (location) {
+    if (location && location !== "Tất cả địa điểm" && location !== "Tất cả") {
       conditions.push("p.location LIKE ?");
       values.push(`%${location}%`);
+    }
+
+    if (experience && experience !== "Tất cả") {
+      conditions.push("p.experience LIKE ?");
+      values.push(`%${experience}%`);
+    }
+
+    if (gender && gender !== "Tất cả") {
+      conditions.push("p.gender = ?");
+      values.push(gender);
+    }
+
+    if (workStyle && workStyle !== "Tất cả") {
+      conditions.push("d.work_style LIKE ?");
+      values.push(`%${workStyle}%`);
+    }
+
+    if (specialtiesParam) {
+      const specs = specialtiesParam.split(",").map((s) => s.trim()).filter(Boolean);
+      if (specs.length) {
+        const specConds = specs.map(() => "d.specialties LIKE ?");
+        conditions.push(`(${specConds.join(" OR ")})`);
+        specs.forEach((s) => values.push(`%${s}%`));
+      }
+    }
+
+    if (languagesParam) {
+      const langs = languagesParam.split(",").map((l) => l.trim()).filter(Boolean);
+      if (langs.length) {
+        const langConds = langs.map(() => "d.languages LIKE ?");
+        conditions.push(`(${langConds.join(" OR ")})`);
+        langs.forEach((l) => values.push(`%${l}%`));
+      }
     }
 
     const whereClause = conditions.length ? ` AND ${conditions.join(" AND ")}` : "";
@@ -195,6 +236,7 @@ exports.listPhotographers = async (req, res) => {
       `SELECT COUNT(*) AS total
        FROM photographer_profiles p
        INNER JOIN users u ON u.user_id = p.user_id
+       LEFT JOIN photographer_profile_details d ON d.photographer_id = p.photographer_id
        WHERE (p.status = 'active' OR (p.status = 'pending' AND EXISTS (
          SELECT 1 FROM photographer_photos visible_photo
          WHERE visible_photo.photographer_id = p.photographer_id
