@@ -260,8 +260,8 @@ function setupPhotoDragSort(grid) {
 
 async function uploadImage(file) {
   const status = document.getElementById('profileSaveStatus');
-  if (!/^image\/(jpeg|png|gif|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
-    status.textContent = 'Chỉ hỗ trợ JPG, PNG, GIF hoặc WEBP tối đa 5 MB.';
+  if (!/^image\/(jpeg|png|gif|webp)$/.test(file.type) || file.size > 25 * 1024 * 1024) {
+    status.textContent = 'Chỉ hỗ trợ JPG, PNG, GIF hoặc WEBP tối đa 25 MB.';
     return null;
   }
   const formData = new FormData();

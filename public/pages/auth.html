@@ -535,7 +535,7 @@
             multiple
             required
           />
-          <span class="helper-text">Tải lên từ 1 đến 12 ảnh JPG, PNG, GIF hoặc WEBP; tối đa 5 MB mỗi ảnh.</span>
+          <span class="helper-text">Tải lên từ 1 đến 12 ảnh JPG, PNG, GIF hoặc WEBP; tối đa 25 MB mỗi ảnh.</span>
           <div id="photographerPhotoPreview" class="photographer-photo-preview" aria-live="polite"></div>
           <p id="photographerRegisterStatus" class="photographer-register-status" role="status" aria-live="polite"></p>
         </div>
@@ -762,6 +762,13 @@
             return;
           }
 
+          const MAX_PHOTO_SIZE = 25 * 1024 * 1024;
+          const oversizedFile = photoFiles.find((file) => file.size > MAX_PHOTO_SIZE);
+          if (oversizedFile) {
+            status.textContent = `Ảnh "${oversizedFile.name}" vượt quá dung lượng tối đa 25 MB (${(oversizedFile.size / (1024 * 1024)).toFixed(1)} MB). Vui lòng chọn ảnh nhỏ hơn.`;
+            return;
+          }
+
           // Đóng gói toàn bộ dữ liệu vào một Object
           const formData = {
             fullName: document.getElementById("regFullName").value,
@@ -827,13 +834,27 @@
       document.getElementById("regPhotographerPhotos").addEventListener("change", (event) => {
         const files = Array.from(event.target.files);
         const preview = document.getElementById("photographerPhotoPreview");
+        const status = document.getElementById("photographerRegisterStatus");
         preview.replaceChildren();
+
         if (files.length > 12) {
-          document.getElementById("photographerRegisterStatus").textContent = "Chỉ được chọn tối đa 12 ảnh.";
+          status.textContent = "Chỉ được chọn tối đa 12 ảnh.";
           event.target.value = "";
           return;
         }
-        document.getElementById("photographerRegisterStatus").textContent = "";
+
+        const MAX_PHOTO_SIZE = 25 * 1024 * 1024; // Cho phép tải lên file đến 25 MB (hỗ trợ > 20 MB)
+        const oversizedFiles = files.filter((file) => file.size > MAX_PHOTO_SIZE);
+        if (oversizedFiles.length > 0) {
+          const names = oversizedFiles
+            .map((f) => `"${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} MB)`)
+            .join(", ");
+          status.textContent = `Ảnh vượt quá dung lượng tối đa 25 MB: ${names}. Vui lòng chọn lại.`;
+          event.target.value = "";
+          return;
+        }
+
+        status.textContent = "";
         for (const file of files) {
           const image = document.createElement("img");
           image.alt = file.name;

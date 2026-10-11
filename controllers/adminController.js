@@ -152,7 +152,16 @@ exports.updatePhotographerStatus = async (req, res) => {
       [status, photographerId],
     );
     if (!result.affectedRows) return res.status(404).json({ success: false, message: "Không tìm thấy hồ sơ thợ ảnh." });
-    res.json({ success: true, message: status === "active" ? "Đã kích hoạt tài khoản thợ ảnh." : "Đã ngừng kích hoạt tài khoản thợ ảnh." });
+    const message = status === "active" ? "Đã kích hoạt tài khoản thợ ảnh." : "Đã ngừng kích hoạt tài khoản thợ ảnh.";
+    res.json({
+      success: true,
+      message,
+      data: {
+        photographerId,
+        status,
+        message,
+      },
+    });
   } catch (error) {
     console.error("Lỗi cập nhật trạng thái thợ ảnh:", error);
     res.status(500).json({ success: false, message: "Không thể cập nhật trạng thái thợ ảnh." });

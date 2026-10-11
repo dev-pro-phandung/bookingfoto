@@ -18,9 +18,11 @@ const storage = multer.diskStorage({
   },
 });
 
+const MAX_UPLOAD_SIZE = 25 * 1024 * 1024; // 25 MB (hỗ trợ file ảnh lớn hơn 20 MB)
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_SIZE },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -33,7 +35,12 @@ const upload = multer({
 router.post(
   "/upload",
   (req, res, next) => upload.single("image")(req, res, (error) => {
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      if (error.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ error: "File ảnh vượt quá dung lượng tối đa cho phép (25 MB)." });
+      }
+      return res.status(400).json({ error: error.message });
+    }
     next();
   }),
   (req, res) => {

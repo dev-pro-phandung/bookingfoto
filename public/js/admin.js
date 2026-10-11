@@ -48,7 +48,7 @@ async function api(path, options = {}) {
     throw new Error('Phiên đăng nhập đã hết hạn.');
   }
   if (!response.ok || !result.success) throw new Error(result.message || 'Không thể tải dữ liệu quản trị.');
-  return result.data;
+  return result.data !== undefined ? result.data : result;
 }
 
 function setStatus(message, isError = true) {
@@ -202,7 +202,8 @@ async function updateStatus(id, status) {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
-    setStatus(result.message, false);
+    const message = result?.message || (status === 'active' ? 'Đã kích hoạt tài khoản thợ ảnh.' : 'Đã ngừng kích hoạt tài khoản thợ ảnh.');
+    setStatus(message, false);
     await refreshData();
   } catch (error) {
     setStatus(error.message);
