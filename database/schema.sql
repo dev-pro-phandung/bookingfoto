@@ -151,15 +151,26 @@ CREATE TABLE IF NOT EXISTS payments (
 
 CREATE TABLE IF NOT EXISTS reviews (
   review_id INT NOT NULL AUTO_INCREMENT,
-  booking_id INT NOT NULL,
+  booking_id INT NULL,
+  photographer_id INT NULL,
+  user_id INT NULL,
+  client_name VARCHAR(100) NULL,
   rating TINYINT NULL,
   comment TEXT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (review_id),
   KEY ix_reviews_booking (booking_id),
+  KEY ix_reviews_photographer (photographer_id),
+  KEY ix_reviews_user (user_id),
   CONSTRAINT fk_reviews_booking
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_reviews_photographer
+    FOREIGN KEY (photographer_id) REFERENCES photographer_profiles(photographer_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_reviews_user
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS blog_categories (

@@ -166,3 +166,20 @@ document.getElementById('nextPageBtn').addEventListener('click', () => { if (sta
 document.getElementById('lastPageBtn').addEventListener('click', () => { state.page = state.totalPages; loadPhotographers(); });
 
 loadPhotographers();
+
+if (typeof io === 'function') {
+  try {
+    const listSocket = io();
+    listSocket.on('photographer_rating_updated', (payload) => {
+      if (!payload || !payload.photographerId) return;
+      const target = photographers.find((p) => Number(p.id) === Number(payload.photographerId));
+      if (target) {
+        target.rating = Number(payload.rating);
+        target.reviewCount = Number(payload.reviewCount);
+        renderPhotographers();
+      }
+    });
+  } catch (err) {
+    console.warn('Socket connection error in photographers.js:', err);
+  }
+}

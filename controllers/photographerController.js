@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const jwt = require("jsonwebtoken");
 
 const allowedSorts = {
   newest: "p.photographer_id DESC",
@@ -29,14 +30,14 @@ const baseSelect = `
     COALESCE((
       SELECT AVG(r.rating)
       FROM reviews r
-      INNER JOIN bookings rb ON rb.booking_id = r.booking_id
-      WHERE rb.photographer_id = p.photographer_id
+      LEFT JOIN bookings rb ON rb.booking_id = r.booking_id
+      WHERE (r.photographer_id = p.photographer_id OR rb.photographer_id = p.photographer_id)
     ), 0) AS rating,
     (
       SELECT COUNT(*)
       FROM reviews r
-      INNER JOIN bookings rb ON rb.booking_id = r.booking_id
-      WHERE rb.photographer_id = p.photographer_id
+      LEFT JOIN bookings rb ON rb.booking_id = r.booking_id
+      WHERE (r.photographer_id = p.photographer_id OR rb.photographer_id = p.photographer_id)
     ) AS reviewCount,
     (
       SELECT COUNT(*)
@@ -243,14 +244,20 @@ exports.getPhotographer = async (req, res) => {
     const photographer = normalizePhotographer(rows[0]);
     photographer.photos = await getPhotographerPhotos(photographer.id);
     const [reviews] = await db.execute(
-      `SELECT r.rating, r.comment, r.created_at AS createdAt, u.full_name AS clientName
+      `SELECT 
+         r.review_id AS reviewId,
+         r.rating, 
+         r.comment, 
+         r.created_at AS createdAt, 
+         COALESCE(u.full_name, r.client_name, 'Khách hàng') AS clientName,
+         r.user_id AS userId
        FROM reviews r
-       INNER JOIN bookings b ON b.booking_id = r.booking_id
-       INNER JOIN users u ON u.user_id = b.user_id
-       WHERE b.photographer_id = ? AND b.status = 'completed'
+       LEFT JOIN bookings b ON b.booking_id = r.booking_id
+       LEFT JOIN users u ON u.user_id = COALESCE(r.user_id, b.user_id)
+       WHERE (r.photographer_id = ? OR b.photographer_id = ?)
        ORDER BY r.created_at DESC
-       LIMIT 20`,
-      [req.params.id],
+       LIMIT 50`,
+      [req.params.id, req.params.id],
     );
     res.json({ success: true, data: { ...photographer, reviews } });
   } catch (error) {
@@ -288,14 +295,14 @@ exports.getOwnPhotographerProfile = async (req, res) => {
          COALESCE((
            SELECT AVG(r.rating)
            FROM reviews r
-           INNER JOIN bookings rb ON rb.booking_id = r.booking_id
-           WHERE rb.photographer_id = p.photographer_id
+           LEFT JOIN bookings rb ON rb.booking_id = r.booking_id
+           WHERE (r.photographer_id = p.photographer_id OR rb.photographer_id = p.photographer_id)
          ), 0) AS rating,
          (
            SELECT COUNT(*)
            FROM reviews r
-           INNER JOIN bookings rb ON rb.booking_id = r.booking_id
-           WHERE rb.photographer_id = p.photographer_id
+           LEFT JOIN bookings rb ON rb.booking_id = r.booking_id
+           WHERE (r.photographer_id = p.photographer_id OR rb.photographer_id = p.photographer_id)
          ) AS reviewCount,
          (
            SELECT COUNT(*) FROM bookings b
@@ -319,18 +326,198 @@ exports.getOwnPhotographerProfile = async (req, res) => {
     const photographer = normalizePhotographer(rows[0]);
     photographer.photos = await getPhotographerPhotos(photographer.id);
     const [reviews] = await db.execute(
-      `SELECT r.rating, r.comment, r.created_at AS createdAt, u.full_name AS clientName
+      `SELECT 
+         r.review_id AS reviewId,
+         r.rating, 
+         r.comment, 
+         r.created_at AS createdAt, 
+         COALESCE(u.full_name, r.client_name, 'Khách hàng') AS clientName,
+         r.user_id AS userId
        FROM reviews r
-       INNER JOIN bookings b ON b.booking_id = r.booking_id
-       INNER JOIN users u ON u.user_id = b.user_id
-       WHERE b.photographer_id = ? AND b.status = 'completed'
-       ORDER BY r.created_at DESC LIMIT 20`,
-      [photographer.id],
+       LEFT JOIN bookings b ON b.booking_id = r.booking_id
+       LEFT JOIN users u ON u.user_id = COALESCE(r.user_id, b.user_id)
+       WHERE (r.photographer_id = ? OR b.photographer_id = ?)
+       ORDER BY r.created_at DESC LIMIT 50`,
+      [photographer.id, photographer.id],
     );
 
     res.json({ success: true, data: { ...photographer, status: rows[0].status, reviews } });
   } catch (error) {
     console.error("Lỗi khi tải hồ sơ cá nhân nhiếp ảnh gia:", error);
     res.status(500).json({ success: false, message: "Không thể tải hồ sơ cá nhân." });
+  }
+};
+
+exports.getPhotographerReviews = async (req, res) => {
+  try {
+    const photographerId = req.params.id;
+    if (!/^\d+$/.test(photographerId)) {
+      return res.status(400).json({ success: false, message: "Mã nhiếp ảnh gia không hợp lệ." });
+    }
+
+    const [reviews] = await db.execute(
+      `SELECT 
+         r.review_id AS reviewId,
+         r.rating, 
+         r.comment, 
+         r.created_at AS createdAt, 
+         COALESCE(u.full_name, r.client_name, 'Khách hàng') AS clientName,
+         r.user_id AS userId
+       FROM reviews r
+       LEFT JOIN bookings b ON b.booking_id = r.booking_id
+       LEFT JOIN users u ON u.user_id = COALESCE(r.user_id, b.user_id)
+       WHERE (r.photographer_id = ? OR b.photographer_id = ?)
+       ORDER BY r.created_at DESC
+       LIMIT 50`,
+      [photographerId, photographerId]
+    );
+
+    const [statRows] = await db.execute(
+      `SELECT 
+         COALESCE(AVG(r.rating), 0) AS avgRating,
+         COUNT(*) AS reviewCount
+       FROM reviews r
+       LEFT JOIN bookings b ON b.booking_id = r.booking_id
+       WHERE (r.photographer_id = ? OR b.photographer_id = ?)`,
+      [photographerId, photographerId]
+    );
+
+    const avgRating = Number(statRows[0]?.avgRating) || 0;
+    const reviewCount = Number(statRows[0]?.reviewCount) || 0;
+
+    res.json({
+      success: true,
+      data: {
+        reviews,
+        stats: {
+          rating: Number(avgRating.toFixed(1)),
+          reviewCount
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Lỗi khi tải danh sách đánh giá:", error);
+    res.status(500).json({ success: false, message: "Không thể tải danh sách đánh giá." });
+  }
+};
+
+exports.createPhotographerReview = async (req, res) => {
+  try {
+    const photographerId = req.params.id;
+    if (!/^\d+$/.test(photographerId)) {
+      return res.status(400).json({ success: false, message: "Mã nhiếp ảnh gia không hợp lệ." });
+    }
+
+    const rating = Math.round(Number(req.body.rating));
+    const comment = String(req.body.comment || "").trim();
+    let clientName = String(req.body.clientName || "").trim();
+
+    if (!rating || Number.isNaN(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Vui lòng chọn số sao đánh giá từ 1 đến 5 sao." });
+    }
+
+    if (!comment) {
+      return res.status(400).json({ success: false, message: "Vui lòng nhập nội dung đánh giá." });
+    }
+
+    if (comment.length > 1000) {
+      return res.status(400).json({ success: false, message: "Nội dung nhận xét tối đa 1000 ký tự." });
+    }
+
+    // Kiểm tra nhiếp ảnh gia có tồn tại
+    const [photographers] = await db.execute(
+      "SELECT photographer_id FROM photographer_profiles WHERE photographer_id = ?",
+      [photographerId]
+    );
+    if (!photographers.length) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy nhiếp ảnh gia." });
+    }
+
+    // Kiểm tra token xác thực nếu có
+    let userId = null;
+    const authHeader = req.get("authorization") || "";
+    const [scheme, token] = authHeader.split(" ");
+    if (scheme === "Bearer" && token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "development-only-secret");
+        userId = decoded.userId;
+        const [users] = await db.execute("SELECT full_name FROM users WHERE user_id = ?", [userId]);
+        if (users.length && users[0].full_name) {
+          clientName = users[0].full_name;
+        }
+      } catch (e) {
+        // Token không hợp lệ hoặc hết hạn
+      }
+    }
+
+    if (!clientName) {
+      clientName = "Khách hàng";
+    }
+
+    // Tìm xem user đã từng có buổi chụp hoàn thành với nhiếp ảnh gia này không
+    let bookingId = null;
+    if (userId) {
+      const [userBookings] = await db.execute(
+        "SELECT booking_id FROM bookings WHERE photographer_id = ? AND user_id = ? AND status = 'completed' ORDER BY booking_id DESC LIMIT 1",
+        [photographerId, userId]
+      );
+      if (userBookings.length) {
+        bookingId = userBookings[0].booking_id;
+      }
+    }
+
+    const [insertResult] = await db.execute(
+      `INSERT INTO reviews (photographer_id, user_id, booking_id, client_name, rating, comment)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [photographerId, userId, bookingId, clientName, rating, comment]
+    );
+
+    // Tính lại trung bình sao và tổng số đánh giá mới nhất
+    const [statRows] = await db.execute(
+      `SELECT 
+         COALESCE(AVG(r.rating), 0) AS avgRating,
+         COUNT(*) AS reviewCount
+       FROM reviews r
+       LEFT JOIN bookings b ON b.booking_id = r.booking_id
+       WHERE (r.photographer_id = ? OR b.photographer_id = ?)`,
+      [photographerId, photographerId]
+    );
+
+    const avgRating = Number(statRows[0]?.avgRating) || rating;
+    const reviewCount = Number(statRows[0]?.reviewCount) || 1;
+
+    const reviewData = {
+      reviewId: insertResult.insertId,
+      photographerId: Number(photographerId),
+      rating,
+      comment,
+      clientName,
+      createdAt: new Date().toISOString(),
+      userId,
+      stats: {
+        rating: Number(avgRating.toFixed(1)),
+        reviewCount
+      }
+    };
+
+    // Phát sự kiện real-time qua Socket.io
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`photographer_${photographerId}`).emit("new_review", reviewData);
+      io.emit("photographer_rating_updated", {
+        photographerId: Number(photographerId),
+        rating: Number(avgRating.toFixed(1)),
+        reviewCount
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Cảm ơn bạn đã gửi đánh giá!",
+      data: reviewData
+    });
+  } catch (error) {
+    console.error("Lỗi khi thêm đánh giá:", error);
+    res.status(500).json({ success: false, message: "Không thể gửi đánh giá. Vui lòng thử lại sau." });
   }
 };

@@ -64,8 +64,8 @@ exports.listPhotographers = async (req, res) => {
          COALESCE((
            SELECT AVG(r.rating)
            FROM reviews r
-           INNER JOIN bookings b ON b.booking_id = r.booking_id
-           WHERE b.photographer_id = pp.photographer_id
+           LEFT JOIN bookings b ON b.booking_id = r.booking_id
+           WHERE (r.photographer_id = pp.photographer_id OR b.photographer_id = pp.photographer_id)
          ), 0) AS rating
        FROM photographer_profiles pp
        INNER JOIN users u ON u.user_id = pp.user_id

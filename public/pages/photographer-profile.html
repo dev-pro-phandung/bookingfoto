@@ -163,8 +163,75 @@
           <section class="tab-panel reviews-panel" id="reviewsPanel" role="tabpanel" aria-labelledby="reviewsTab" hidden>
             <div class="reviews-summary">
               <div class="rating-score"><strong id="ratingValue">0.0</strong><span>★</span></div>
-              <div><h2>Đánh giá từ khách hàng</h2><p id="reviewsDescription"></p></div>
+              <div>
+                <h2>Đánh giá từ khách hàng</h2>
+                <p id="reviewsDescription"></p>
+              </div>
+              <div class="realtime-status-pill" id="realtimeBadge" title="Kết nối trực tiếp thời gian thực">
+                <span class="realtime-dot"></span>
+                <span class="realtime-text">Real-time</span>
+              </div>
             </div>
+
+            <!-- Khối gửi đánh giá & bình luận mới -->
+            <div class="review-compose-box" id="reviewComposeBox">
+              <div class="compose-header">
+                <h3 class="compose-title">Viết đánh giá & nhận xét</h3>
+                <span class="compose-sub">Chia sẻ cảm nhận về dịch vụ và chất lượng của nhiếp ảnh gia</span>
+              </div>
+
+              <form id="reviewForm" class="review-compose-form">
+                <div class="form-row rating-picker-row">
+                  <label class="form-label" id="starPickerLabel">Chọn số sao đánh giá: <span class="req">*</span></label>
+                  <div class="star-rating-picker" id="starRatingPicker" role="radiogroup" aria-labelledby="starPickerLabel">
+                    <button type="button" class="star-picker-btn" data-value="1" aria-label="1 sao" title="1 sao - Rất tệ">★</button>
+                    <button type="button" class="star-picker-btn" data-value="2" aria-label="2 sao" title="2 sao - Chưa hài lòng">★</button>
+                    <button type="button" class="star-picker-btn" data-value="3" aria-label="3 sao" title="3 sao - Bình thường">★</button>
+                    <button type="button" class="star-picker-btn" data-value="4" aria-label="4 sao" title="4 sao - Tốt, hài lòng">★</button>
+                    <button type="button" class="star-picker-btn active" data-value="5" aria-label="5 sao" title="5 sao - Tuyệt vời">★</button>
+                    <span id="starFeedbackText" class="star-feedback-text">5/5 - Tuyệt vời, rất hài lòng!</span>
+                  </div>
+                  <input type="hidden" id="ratingInput" name="rating" value="5" />
+                </div>
+
+                <div class="form-row reviewer-identity-row" id="reviewerIdentityRow">
+                  <div id="loggedInIdentity" class="logged-in-identity" hidden>
+                    <span class="user-avatar-tag" id="userAvatarTag">U</span>
+                    <span class="identity-text">Đang đánh giá với tư cách: <strong id="loggedInUserName">Người dùng</strong></span>
+                  </div>
+                  <div id="guestIdentity" class="guest-identity">
+                    <label for="clientNameInput" class="form-label">Họ tên của bạn: <span class="req">*</span></label>
+                    <div class="guest-input-wrap">
+                      <input type="text" id="clientNameInput" class="form-control" placeholder="Nhập tên của bạn (ví dụ: Mai Linh, Tuấn Anh...)" maxlength="70" />
+                      <span class="guest-login-tip">Đã có tài khoản? <a href="/pages/auth.html" id="reviewAuthLink">Đăng nhập ngay</a></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="comment-label-wrap">
+                    <label for="reviewCommentInput" class="form-label">Nội dung nhận xét: <span class="req">*</span></label>
+                    <span id="commentCharCount" class="char-counter">0/1000</span>
+                  </div>
+                  <textarea id="reviewCommentInput" class="form-control comment-textarea" rows="3" placeholder="Chia sẻ trải nghiệm của bạn về buổi chụp, phong cách làm việc, sự đúng giờ và chất lượng ảnh..." maxlength="1000" required></textarea>
+                </div>
+
+                <div class="compose-actions">
+                  <button type="submit" id="submitReviewButton" class="submit-review-btn">
+                    <span class="btn-spinner" id="reviewBtnSpinner" hidden></span>
+                    <span id="submitReviewBtnText">Gửi đánh giá</span>
+                  </button>
+                  <p id="reviewFormStatus" class="review-status-msg" role="status" aria-live="polite"></p>
+                </div>
+              </form>
+            </div>
+
+            <!-- Thông báo cập nhật realtime khi có đánh giá mới từ người khác -->
+            <div id="realtimeLiveToast" class="realtime-live-toast" hidden>
+              <span class="live-icon">✨</span>
+              <span id="realtimeLiveMessage">Vừa có đánh giá mới từ khách hàng!</span>
+            </div>
+
             <div id="reviewsEmpty" class="empty-panel">
               <span class="empty-icon" aria-hidden="true">☆</span>
               <h3 id="reviewsEmptyTitle">Chưa có đánh giá</h3>
@@ -180,6 +247,7 @@
       <a href="/">Pdun.Foto</a>
       <span>Your Moments, Our Passion!</span>
     </footer>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/js/photographer-profile.js"></script>
     <script src="/js/account-header.js"></script>
   </body>
