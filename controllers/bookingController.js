@@ -181,13 +181,19 @@ function parseBookingDetails(value) {
 }
 
 exports.getPhotographerBookings = async (req, res) => {
-  if (req.auth.role !== "photographer") {
-    return res.status(403).json({ success: false, message: "Chỉ nhiếp ảnh gia mới xem được lịch của mình." });
-  }
-
   try {
-    const photographerId = await getPhotographerId(req.auth.userId);
+    let photographerId = null;
+
+    if (req.query.photographerId && !Number.isNaN(Number(req.query.photographerId))) {
+      photographerId = Number(req.query.photographerId);
+    } else {
+      photographerId = await getPhotographerId(req.auth.userId);
+    }
+
     if (!photographerId) {
+      if (req.auth.role !== "photographer") {
+        return res.status(403).json({ success: false, message: "Chỉ nhiếp ảnh gia mới có lịch chụp của thợ." });
+      }
       return res.status(404).json({ success: false, message: "Tài khoản chưa có hồ sơ nhiếp ảnh gia." });
     }
 
@@ -206,10 +212,14 @@ exports.getPhotographerBookings = async (req, res) => {
          package.duration_minutes AS durationMinutes,
          client.full_name AS clientName,
          client.phone AS clientPhone,
-         client.email AS clientEmail
+         client.email AS clientEmail,
+         photographer.full_name AS photographerName,
+         pp.photographer_id AS photographerId
        FROM bookings b
        INNER JOIN packages package ON package.package_id = b.package_id
        INNER JOIN users client ON client.user_id = b.user_id
+       LEFT JOIN photographer_profiles pp ON pp.photographer_id = b.photographer_id
+       LEFT JOIN users photographer ON photographer.user_id = pp.user_id
        WHERE b.photographer_id = ?
        ORDER BY b.booking_date ASC, b.start_time ASC, b.created_at DESC`,
       [photographerId],

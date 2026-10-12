@@ -23,18 +23,77 @@
 
     <main class="bookings-page">
       <div class="page-heading">
-        <div><p class="eyebrow">PDUN.FOTO / TÀI KHOẢN</p><h1>Lịch đặt của tôi</h1><p class="heading-copy">Theo dõi tình trạng và thông tin các buổi chụp của bạn.</p></div>
-        <a class="new-booking" href="/pages/booking.html"><span aria-hidden="true">＋</span> Đặt buổi chụp</a>
+        <div>
+          <p id="pageEyebrow" class="eyebrow">PDUN.FOTO / TÀI KHOẢN</p>
+          <h1 id="pageTitle">Lịch đặt của tôi</h1>
+          <p id="pageSubtitle" class="heading-copy">Theo dõi tình trạng và thông tin các buổi chụp của bạn.</p>
+        </div>
+        <div class="heading-action-group">
+          <!-- Chuyển đổi góc nhìn cho thợ ảnh: Buổi chụp thợ nhận vs Buổi thợ đặt -->
+          <div id="photographerRoleSwitch" class="role-perspective-switch" hidden>
+            <button id="viewPhotographerShootsBtn" class="perspective-btn active" type="button">📸 Lịch nhận chụp của thợ</button>
+            <button id="viewClientShootsBtn" class="perspective-btn" type="button">🛍️ Lịch tôi đã đặt</button>
+          </div>
+          <a id="newBookingBtn" class="new-booking" href="/pages/booking.html"><span aria-hidden="true">＋</span> Đặt buổi chụp</a>
+          <button id="refreshScheduleBtn" class="refresh-schedule-btn" type="button" title="Làm mới lịch chụp">↻</button>
+        </div>
       </div>
-      <div class="booking-filters" role="group" aria-label="Lọc lịch đặt">
-        <button class="filter-button active" type="button" data-status="all">Tất cả</button>
-        <button class="filter-button" type="button" data-status="pending">Chờ xác nhận</button>
-        <button class="filter-button" type="button" data-status="confirmed">Đã xác nhận</button>
-        <button class="filter-button" type="button" data-status="completed">Hoàn tất</button>
-        <button class="filter-button" type="button" data-status="cancelled">Đã hủy</button>
+
+      <!-- THANH ĐIỀU KHIỂN & CHUYỂN ĐỔI CHẾ ĐỘ XEM: BẢNG LỊCH THÁNG VS DANH SÁCH -->
+      <div class="bookings-toolbar">
+        <div class="view-mode-toggles" role="radiogroup" aria-label="Chế độ hiển thị">
+          <button id="toggleCalendarViewBtn" class="view-mode-pill active" type="button" data-mode="calendar">📅 Bảng lịch tháng</button>
+          <button id="toggleListViewBtn" class="view-mode-pill" type="button" data-mode="list">📋 Danh sách chi tiết</button>
+        </div>
+        <div class="booking-filters" role="group" aria-label="Lọc lịch đặt">
+          <button class="filter-button active" type="button" data-status="all">Tất cả</button>
+          <button class="filter-button" type="button" data-status="pending">Chờ xác nhận</button>
+          <button class="filter-button" type="button" data-status="confirmed">Đã xác nhận</button>
+          <button class="filter-button" type="button" data-status="completed">Hoàn tất</button>
+          <button class="filter-button" type="button" data-status="cancelled">Đã hủy</button>
+        </div>
       </div>
+
       <p id="listStatus" class="list-status" role="status" aria-live="polite">Đang tải lịch đặt...</p>
-      <section id="bookingList" class="booking-list" aria-live="polite"></section>
+
+      <!-- KHUNG BẢNG LỊCH THÁNG HIỂN THỊ TO (BIG CALENDAR VIEW) -->
+      <div id="bookingCalendarContainer" class="booking-calendar-container">
+        <div class="calendar-top-bar">
+          <div class="calendar-nav">
+            <button id="calPrevMonth" class="cal-nav-btn" type="button" title="Tháng trước">◀</button>
+            <h3 id="calMonthDisplay" class="cal-month-title">Tháng 10 / 2026</h3>
+            <button id="calNextMonth" class="cal-nav-btn" type="button" title="Tháng sau">▶</button>
+            <button id="calTodayBtn" class="cal-today-btn" type="button">Hôm nay</button>
+          </div>
+          <div class="calendar-meta-info">
+            <span id="calTotalMonthBookings" class="cal-summary-pill">0 buổi chụp trong tháng</span>
+            <div class="calendar-legend">
+              <span class="legend-item"><span class="legend-dot status-pending"></span>Chờ xác nhận</span>
+              <span class="legend-item"><span class="legend-dot status-confirmed"></span>Đã xác nhận</span>
+              <span class="legend-item"><span class="legend-dot status-completed"></span>Hoàn tất</span>
+              <span class="legend-item"><span class="legend-dot status-cancelled"></span>Đã hủy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="calendar-grid-wrapper">
+          <div class="calendar-weekdays">
+            <div class="weekday-col">Thứ 2</div>
+            <div class="weekday-col">Thứ 3</div>
+            <div class="weekday-col">Thứ 4</div>
+            <div class="weekday-col">Thứ 5</div>
+            <div class="weekday-col">Thứ 6</div>
+            <div class="weekday-col">Thứ 7</div>
+            <div class="weekday-col weekend">Chủ nhật</div>
+          </div>
+          <div id="calendarDaysGrid" class="calendar-days-grid" aria-label="Lưới ngày trong tháng">
+            <!-- Render động bởi JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- KHUNG DANH SÁCH CHI TIẾT (LIST VIEW) -->
+      <section id="bookingList" class="booking-list" aria-live="polite" hidden></section>
     </main>
 
     <footer class="bookings-footer"><a href="/">Pdun.Foto</a><span>Hỗ trợ đặt lịch chụp hình</span></footer>
