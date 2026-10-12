@@ -723,6 +723,11 @@
           localStorage.setItem("userId", String(result.user.id));
           localStorage.setItem("userRole", result.user.role);
           localStorage.setItem("userFullName", result.user.fullName);
+          if (result.user.photographerId) {
+            localStorage.setItem("photographerId", String(result.user.photographerId));
+          } else {
+            localStorage.removeItem("photographerId");
+          }
           localStorage.setItem("token", result.token);
           alert("Đăng nhập thành công!");
           window.location.href = result.user.role === "admin"

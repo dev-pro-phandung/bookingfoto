@@ -112,7 +112,7 @@ function renderCard(photographer, index) {
         ${photographer.specialties ? `<div class="tags mini-specialties">${photographer.specialties.split(/[,;|]/).map((specialty) => specialty.trim()).filter(Boolean).slice(0, 4).map((specialty) => `<span class="tag">${escapeHtml(specialty)}</span>`).join('')}</div>` : ''}
         <div class="card-actions">
           <span class="detail-btn">Xem hồ sơ <span>→</span></span>
-          <button type="button" class="card-book-btn" data-id="${photographer.id}"><span>＋</span> Đặt lịch</button>
+          ${localStorage.getItem('userRole') !== 'photographer' ? `<button type="button" class="card-book-btn" data-id="${photographer.id}"><span>＋</span> Đặt lịch</button>` : ''}
         </div>
       </div>
     </a>

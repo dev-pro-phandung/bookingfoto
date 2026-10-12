@@ -100,3 +100,19 @@
     max-width: 132px;
   }
 }
+
+/* ==========================================================================
+   ẨN / HIỆN NÚT ĐẶT LỊCH DỰA THEO VAI TRÒ TÀI KHOẢN (THỢ VS NGƯỜI DÙNG)
+   ========================================================================== */
+html[data-user-role="photographer"] nav a[href*="/pages/booking.html"],
+html[data-user-role="photographer"] header a[href*="/pages/booking.html"],
+html[data-user-role="photographer"] .bookings-header a[href*="/pages/booking.html"],
+html[data-user-role="photographer"] #headerBookingLink,
+html[data-user-role="photographer"] #newBookingBtn,
+html[data-user-role="photographer"] .new-booking,
+html[data-user-role="photographer"] .card-book-btn,
+html[data-user-role="photographer"] #bookButton,
+html[data-user-role="photographer"] #secondaryBookButton {
+  display: none !important;
+}
+

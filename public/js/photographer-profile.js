@@ -429,14 +429,22 @@ function renderProfile(photographer) {
   renderPortfolio();
   renderReviews(Array.isArray(photographer.reviews) ? photographer.reviews : []);
 
+  const isPhotographerUser = localStorage.getItem('userRole') === 'photographer' || ownProfile;
   for (const buttonId of ['bookButton', 'secondaryBookButton']) {
     const button = document.getElementById(buttonId);
     if (button) {
-      button.href = bookingUrl;
-      button.removeAttribute('aria-disabled');
-      button.addEventListener('click', () => {
-        sessionStorage.setItem('selectedPhotographerId', String(photographer.id));
-      });
+      if (isPhotographerUser) {
+        button.hidden = true;
+        button.style.display = 'none';
+      } else {
+        button.hidden = false;
+        button.style.removeProperty('display');
+        button.href = bookingUrl;
+        button.removeAttribute('aria-disabled');
+        button.addEventListener('click', () => {
+          sessionStorage.setItem('selectedPhotographerId', String(photographer.id));
+        });
+      }
     }
   }
 

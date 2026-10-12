@@ -20,6 +20,12 @@ const initialPhotographerId = urlPhotographerId
   ? Number(urlPhotographerId)
   : (storedPhotographerId ? Number(storedPhotographerId) : null);
 
+// Chặn tài khoản thợ đặt lịch
+if (localStorage.getItem('userRole') === 'photographer') {
+  alert('Tài khoản nhiếp ảnh gia không thể đặt lịch chụp hình. Đang chuyển hướng về lịch chụp của bạn.');
+  window.location.replace('/pages/my-bookings.html');
+}
+
 // Bắt buộc: "Chỉ khi chọn được thợ nhấn đặt lịch mới chuyển qua tab đặt lịch hiện tại"
 if (!initialPhotographerId || Number.isNaN(initialPhotographerId) || initialPhotographerId <= 0) {
   sessionStorage.removeItem('selectedPhotographerId');

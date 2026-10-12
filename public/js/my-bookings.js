@@ -378,13 +378,26 @@
 
     isPhotographerUser = role === 'photographer' || Boolean(photographerId) || Boolean(targetPhotographerId);
 
-    // Cập nhật giao diện theo vai trò thợ ảnh
+    // Cập nhật giao diện theo vai trò thợ ảnh vs người dùng
     const eyebrowEl = document.getElementById('pageEyebrow');
     const titleEl = document.getElementById('pageTitle');
     const subtitleEl = document.getElementById('pageSubtitle');
     const roleSwitchEl = document.getElementById('photographerRoleSwitch');
+    const newBookingBtn = document.getElementById('newBookingBtn');
+    const headerBookingLinks = document.querySelectorAll('header nav a[href*="/pages/booking.html"], .bookings-header nav a[href*="/pages/booking.html"], #headerBookingLink');
 
     if (isPhotographerUser) {
+      document.documentElement.setAttribute('data-user-role', 'photographer');
+      // Với tài khoản của thợ: Ẩn nút đặt lịch và link đặt lịch trên header
+      if (newBookingBtn) {
+        newBookingBtn.style.display = 'none';
+        newBookingBtn.hidden = true;
+      }
+      headerBookingLinks.forEach((link) => {
+        link.style.display = 'none';
+        link.hidden = true;
+      });
+
       if (roleSwitchEl) roleSwitchEl.hidden = false;
       if (currentPerspective === 'photographer') {
         if (eyebrowEl) eyebrowEl.textContent = 'PDUN.FOTO / LỊCH CHỤP CỦA THỢ';
@@ -395,6 +408,21 @@
         if (titleEl) titleEl.textContent = 'Lịch tôi đã đặt';
         if (subtitleEl) subtitleEl.textContent = 'Các buổi chụp bạn đã đặt với tư cách khách hàng.';
       }
+    } else {
+      document.documentElement.removeAttribute('data-user-role');
+      // Với tài khoản người dùng: Hiển thị nút đặt lịch và link đặt lịch
+      if (newBookingBtn) {
+        newBookingBtn.style.removeProperty('display');
+        newBookingBtn.hidden = false;
+      }
+      headerBookingLinks.forEach((link) => {
+        link.style.removeProperty('display');
+        link.hidden = false;
+      });
+      if (roleSwitchEl) roleSwitchEl.hidden = true;
+      if (eyebrowEl) eyebrowEl.textContent = 'PDUN.FOTO / TÀI KHOẢN';
+      if (titleEl) titleEl.textContent = 'Lịch đặt của tôi';
+      if (subtitleEl) subtitleEl.textContent = 'Theo dõi tình trạng và thông tin các buổi chụp của bạn.';
     }
 
     try {
