@@ -91,10 +91,13 @@ textarea {
   color: #333;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
-.nav a:hover {
+.nav a:hover,
+.nav a.active {
   color: var(--orange);
+  font-weight: 600;
 }
 
 .login-btn {
@@ -114,6 +117,149 @@ textarea {
   max-width: 1180px;
   margin: 28px auto 60px;
   padding: 0 18px;
+}
+
+/* Page Title & Selected Photographer Banner */
+.booking-page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 18px 0;
+  letter-spacing: -0.3px;
+}
+
+.selected-photographer-banner {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+  animation: fadeInBanner 0.25s ease-out;
+}
+
+@keyframes fadeInBanner {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selected-photographer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.selected-photographer-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.selected-photographer-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #166534;
+}
+
+.selected-photographer-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.selected-photographer-avatar-fallback {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  border: 2px solid #ffffff;
+  flex-shrink: 0;
+}
+
+.selected-photographer-name {
+  color: #166534;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.selected-photographer-name:hover {
+  color: #14532d;
+}
+
+.deselect-photographer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border: 1px solid #9ca3af;
+  background: #ffffff;
+  color: #374151;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.deselect-photographer-btn:hover {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  color: #166534;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.deselect-x {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.deselect-photographer-btn:hover .deselect-x {
+  color: #16a34a;
+}
+
+.summary-photographer-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-photographer-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e1dd;
 }
 
 .booking-card {

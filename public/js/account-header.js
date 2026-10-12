@@ -126,3 +126,19 @@
       accountLink.classList.remove('signed-in-name');
     });
 })();
+
+// Điều hướng Đặt Lịch: chỉ khi chọn thợ mới chuyển qua tab đặt lịch
+document.addEventListener('click', (event) => {
+  const bookingLink = event.target.closest('a[href="/pages/booking.html"], a[href^="/pages/booking.html?"]');
+  if (bookingLink) {
+    const selectedPhotographerId = sessionStorage.getItem('selectedPhotographerId');
+    const isDirectBookingUrl = bookingLink.getAttribute('href').includes('photographerId=');
+    if (!selectedPhotographerId && !isDirectBookingUrl) {
+      event.preventDefault();
+      sessionStorage.setItem('bookingNotice', 'Vui lòng chọn nhiếp ảnh gia trước khi đặt lịch chụp hình!');
+      window.location.href = '/pages/photographers.html';
+    } else if (selectedPhotographerId && !isDirectBookingUrl) {
+      bookingLink.href = `/pages/booking.html?photographerId=${encodeURIComponent(selectedPhotographerId)}`;
+    }
+  }
+});

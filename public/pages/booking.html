@@ -22,7 +22,7 @@
           <a href="/#about">Về Pdun.Foto</a>
           <a href="/pages/photographers.html">Nhiếp ảnh gia</a>
           <a href="/pages/my-bookings.html">Lịch đặt của tôi</a>
-          <a href="/pages/booking.html">Đặt lịch</a>
+          <a href="/pages/booking.html" class="active">Đặt lịch</a>
           <a href="/#reasons">Sự kiện</a>
           <a href="/pages/blogs.html">Blogs</a>
         </nav>
@@ -32,11 +32,30 @@
     </header>
 
     <main class="page-shell">
+      <h1 class="booking-page-title">Đặt lịch chụp hình</h1>
+
+      <!-- Banner nhiếp ảnh gia đã chọn -->
+      <div id="selectedPhotographerBanner" class="selected-photographer-banner" hidden>
+        <div class="selected-photographer-left">
+          <span class="selected-photographer-badge" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <span class="selected-photographer-label">Nhiếp ảnh gia đã chọn:</span>
+          <img id="selectedPhotographerAvatar" class="selected-photographer-avatar" src="" alt="Avatar nhiếp ảnh gia" />
+          <a id="selectedPhotographerName" class="selected-photographer-name" href="#" target="_blank" title="Xem hồ sơ nhiếp ảnh gia"></a>
+        </div>
+        <button id="deselectPhotographerBtn" class="deselect-photographer-btn" type="button" aria-label="Bỏ chọn nhiếp ảnh gia">
+          <span class="deselect-x" aria-hidden="true">✕</span> Bỏ chọn
+        </button>
+      </div>
+
       <section class="booking-card">
         <div class="booking-layout">
           <div class="left-panel">
             <div class="section">
-              <h2 class="section-title">Chọn gói chụp</h2>
+              <h2 class="section-title">Chọn thể loại <span class="required">*</span></h2>
               <div id="packageGrid" class="package-grid"></div>
             </div>
 
@@ -152,9 +171,16 @@
               </div>
 
               <div class="summary-card">
+                <div class="summary-line" id="summaryPhotographerRow">
+                  <span>Nhiếp ảnh gia</span>
+                  <div class="summary-photographer-val">
+                    <img id="summaryPhotographerAvatar" class="summary-photographer-avatar" src="" alt="" hidden />
+                    <strong id="selectedPhotographerSummary">Chưa chọn</strong>
+                  </div>
+                </div>
                 <div class="summary-line">
                   <span>Gói chụp</span>
-                  <strong id="selectedPackageName">Cả nhân</strong>
+                  <strong id="selectedPackageName">Cá nhân</strong>
                 </div>
                 <div class="summary-line">
                   <span>Ngày chụp</span>

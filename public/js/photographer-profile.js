@@ -431,8 +431,13 @@ function renderProfile(photographer) {
 
   for (const buttonId of ['bookButton', 'secondaryBookButton']) {
     const button = document.getElementById(buttonId);
-    button.href = bookingUrl;
-    button.removeAttribute('aria-disabled');
+    if (button) {
+      button.href = bookingUrl;
+      button.removeAttribute('aria-disabled');
+      button.addEventListener('click', () => {
+        sessionStorage.setItem('selectedPhotographerId', String(photographer.id));
+      });
+    }
   }
 
   const profileNotice = document.getElementById('profileNotice');

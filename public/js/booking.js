@@ -13,13 +13,30 @@ const timeSlots = [
   '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'
 ];
 
+const urlParams = new URLSearchParams(window.location.search);
+const urlPhotographerId = urlParams.get('photographerId');
+const storedPhotographerId = sessionStorage.getItem('selectedPhotographerId');
+const initialPhotographerId = urlPhotographerId
+  ? Number(urlPhotographerId)
+  : (storedPhotographerId ? Number(storedPhotographerId) : null);
+
+// Bắt buộc: "Chỉ khi chọn được thợ nhấn đặt lịch mới chuyển qua tab đặt lịch hiện tại"
+if (!initialPhotographerId || Number.isNaN(initialPhotographerId) || initialPhotographerId <= 0) {
+  sessionStorage.removeItem('selectedPhotographerId');
+  sessionStorage.setItem('bookingNotice', 'Vui lòng chọn nhiếp ảnh gia trước khi đặt lịch chụp hình!');
+  window.location.replace('/pages/photographers.html');
+} else {
+  sessionStorage.setItem('selectedPhotographerId', String(initialPhotographerId));
+}
+
 const state = {
   selectedPackageId: null,
   selectedDate: '',
   selectedTime: '',
   calendarMonth: new Date().getMonth(),
   calendarYear: new Date().getFullYear(),
-  photographerId: Number(new URLSearchParams(window.location.search).get('photographerId')) || null,
+  photographerId: initialPhotographerId,
+  selectedPhotographer: null,
 };
 
 const packageGrid = document.getElementById('packageGrid');
@@ -36,6 +53,13 @@ const addOnInputs = document.querySelectorAll('.add-on');
 const submitBtn = document.getElementById('submitBookingBtn');
 const validationText = document.getElementById('validationText');
 const toast = document.getElementById('toast');
+
+const selectedPhotographerBanner = document.getElementById('selectedPhotographerBanner');
+const selectedPhotographerAvatar = document.getElementById('selectedPhotographerAvatar');
+const selectedPhotographerName = document.getElementById('selectedPhotographerName');
+const deselectPhotographerBtn = document.getElementById('deselectPhotographerBtn');
+const summaryPhotographerSummary = document.getElementById('selectedPhotographerSummary');
+const summaryPhotographerAvatar = document.getElementById('summaryPhotographerAvatar');
 
 const fieldPackageName = document.getElementById('selectedPackageName');
 const fieldPackagePrice = document.getElementById('selectedPackagePrice');
@@ -203,6 +227,10 @@ function updateSummary() {
 
   const location = locationInput.value.trim();
   fieldLocation.textContent = location || 'Chưa nhập';
+
+  if (summaryPhotographerSummary) {
+    summaryPhotographerSummary.textContent = state.selectedPhotographer?.name || 'Đang tải...';
+  }
 }
 
 function validateBookingForm() {
@@ -316,6 +344,7 @@ async function submitBooking() {
     sampleImageInput.value = '';
     state.selectedDate = '';
     state.selectedTime = '';
+    sessionStorage.removeItem('selectedPhotographerId');
     renderCalendar();
     renderTimeSlots();
     updateSummary();
@@ -326,6 +355,70 @@ async function submitBooking() {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Xác nhận yêu cầu';
   }
+}
+
+function renderSelectedPhotographer(photographer) {
+  if (!photographer) return;
+  state.selectedPhotographer = photographer;
+
+  if (selectedPhotographerBanner) {
+    const avatarUrl = photographer.avatar || (Array.isArray(photographer.photos) ? photographer.photos[0] : '');
+    if (selectedPhotographerAvatar) {
+      if (avatarUrl) {
+        selectedPhotographerAvatar.src = avatarUrl;
+      } else {
+        selectedPhotographerAvatar.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+      }
+      selectedPhotographerAvatar.alt = photographer.name || 'Nhiếp ảnh gia';
+    }
+
+    if (selectedPhotographerName) {
+      selectedPhotographerName.textContent = photographer.name || 'Nhiếp ảnh gia';
+      selectedPhotographerName.href = `/pages/photographer-profile.html?id=${encodeURIComponent(photographer.id)}`;
+    }
+
+    selectedPhotographerBanner.hidden = false;
+  }
+
+  if (summaryPhotographerSummary) {
+    summaryPhotographerSummary.textContent = photographer.name || 'Chưa chọn';
+  }
+  if (summaryPhotographerAvatar) {
+    const avatarUrl = photographer.avatar || (Array.isArray(photographer.photos) ? photographer.photos[0] : '');
+    if (avatarUrl) {
+      summaryPhotographerAvatar.src = avatarUrl;
+      summaryPhotographerAvatar.hidden = false;
+    }
+  }
+}
+
+async function loadSelectedPhotographer() {
+  if (!state.photographerId) return;
+  try {
+    const response = await fetch(`/api/photographers/${state.photographerId}`);
+    const result = await response.json();
+    if (!response.ok || !result.success || !result.data) {
+      throw new Error(result.message || 'Không tìm thấy thông tin nhiếp ảnh gia.');
+    }
+    renderSelectedPhotographer(result.data);
+    updateSummary();
+  } catch (error) {
+    sessionStorage.removeItem('selectedPhotographerId');
+    sessionStorage.setItem('bookingNotice', 'Không tìm thấy thông tin nhiếp ảnh gia hoặc hồ sơ không hợp lệ. Vui lòng chọn lại!');
+    window.location.replace('/pages/photographers.html');
+  }
+}
+
+function handleDeselectPhotographer() {
+  sessionStorage.removeItem('selectedPhotographerId');
+  state.photographerId = null;
+  state.selectedPhotographer = null;
+  sessionStorage.setItem('bookingNotice', 'Đã bỏ chọn nhiếp ảnh gia. Vui lòng chọn nhiếp ảnh gia bạn muốn đặt lịch!');
+  window.location.replace('/pages/photographers.html');
+}
+
+if (deselectPhotographerBtn) {
+  deselectPhotographerBtn.addEventListener('click', handleDeselectPhotographer);
 }
 
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
@@ -384,3 +477,4 @@ loadPackages();
 renderCalendar();
 renderTimeSlots();
 updateSummary();
+loadSelectedPhotographer();
