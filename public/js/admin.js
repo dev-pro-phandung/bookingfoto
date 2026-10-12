@@ -105,8 +105,16 @@ function renderReviewQueue(photographers) {
   }
   queue.innerHTML = photographers.map((photographer) => `
     <article class="review-row">
-      ${imageOrPlaceholder(photographer.cover, 'review-thumb', `Ảnh ${photographer.name}`)}
-      <div><p class="review-name">${escapeHtml(photographer.name)}</p><div class="review-meta">${escapeHtml(photographer.location)} · ${escapeHtml(photographer.experience)}</div><div class="review-meta">Gửi ngày ${escapeHtml(formatDate(photographer.createdAt))}</div></div>
+      <div class="photographer-hover-trigger" data-photographer-id="${photographer.id}" style="display:inline-block;">
+        ${imageOrPlaceholder(photographer.cover, 'review-thumb', `Ảnh ${photographer.name}`)}
+      </div>
+      <div>
+        <p class="review-name photographer-hover-trigger" data-photographer-id="${photographer.id}" style="cursor:pointer;">
+          <strong class="photographer-name-link">${escapeHtml(photographer.name)}</strong> <span class="hover-hint-icon">ℹ️</span>
+        </p>
+        <div class="review-meta">${escapeHtml(photographer.location)} · ${escapeHtml(photographer.experience)}</div>
+        <div class="review-meta">Gửi ngày ${escapeHtml(formatDate(photographer.createdAt))}</div>
+      </div>
       <div class="review-contact">${escapeHtml(photographer.email)}<br />${escapeHtml(photographer.phone)}<br />${escapeHtml(photographer.equipment || 'Chưa có thiết bị')}</div>
       <div class="review-stats"><span>${photographer.photoCount} ảnh bộ sưu tập</span><span>${photographer.bookingCount} lịch · ${photographer.completedBookingCount} buổi hoàn thành</span></div>
       <div class="row-actions"><button class="button-secondary" type="button" data-detail-id="${photographer.id}">Chi tiết</button><button class="button-primary" type="button" data-activate-id="${photographer.id}">Active</button></div>
@@ -118,8 +126,16 @@ function renderPhotographerTable(photographers) {
   const tbody = document.getElementById('photographersTable');
   document.getElementById('photographersEmpty').hidden = photographers.length > 0;
   tbody.innerHTML = photographers.map((photographer) => `
-    <tr>
-      <td><div class="table-person">${imageOrPlaceholder(photographer.cover, 'table-avatar', `Ảnh ${photographer.name}`)}<div><strong>${escapeHtml(photographer.name)}</strong><small>${escapeHtml(photographer.experience)}</small></div></div></td>
+    <tr data-photographer-id="${photographer.id}">
+      <td>
+        <div class="table-person photographer-hover-trigger" data-photographer-id="${photographer.id}" tabindex="0" title="Rê chuột để xem thông tin chi tiết của thợ">
+          ${imageOrPlaceholder(photographer.cover, 'table-avatar', `Ảnh ${photographer.name}`)}
+          <div>
+            <strong class="photographer-name-link">${escapeHtml(photographer.name)} <span class="hover-hint-icon">ℹ️</span></strong>
+            <small>${escapeHtml(photographer.experience)}</small>
+          </div>
+        </div>
+      </td>
       <td>${escapeHtml(photographer.email)}<br />${escapeHtml(photographer.phone)}</td>
       <td>${escapeHtml(photographer.location)}</td>
       <td><strong>${photographer.completedBookingCount}</strong> hoàn thành<br /><small>${photographer.bookingCount} tổng lịch</small></td>
@@ -129,6 +145,225 @@ function renderPhotographerTable(photographers) {
     </tr>
   `).join('');
   tbody.querySelectorAll('[data-detail-id]').forEach((button) => button.addEventListener('click', () => showPhotographerDetail(button.dataset.detailId)));
+}
+
+// Bảng thông tin chi tiết thợ ảnh xổ ra khi hover vào tài khoản thợ
+function setupPhotographerHoverCard() {
+  const card = document.getElementById('photographerHoverCard');
+  if (!card) return;
+
+  let hoverTimeout = null;
+  let closeTimeout = null;
+  let currentTrigger = null;
+
+  function showCard(photographer, triggerEl) {
+    if (!photographer || !triggerEl) return;
+    clearTimeout(closeTimeout);
+
+    const specialtiesList = photographer.specialties 
+      ? String(photographer.specialties).split(',').map(s => s.trim()).filter(Boolean)
+      : [];
+
+    const ratingVal = Number(photographer.rating) || 0;
+    const ratingLabel = ratingVal >= 4.8 ? 'Xuất sắc' : (ratingVal >= 4.0 ? 'Rất tốt' : (ratingVal > 0 ? 'Tốt' : 'Mới'));
+    const ratingDisplay = ratingVal > 0 ? `★ ${ratingVal.toFixed(1)} (${ratingLabel})` : '★ Chưa có đánh giá';
+
+    card.innerHTML = `
+      <div class="ph-card-inner">
+        <div class="ph-card-header">
+          <div class="ph-avatar-wrap">
+            ${imageOrPlaceholder(photographer.cover, 'ph-card-avatar', `Ảnh ${photographer.name}`)}
+            <span class="ph-status-dot status-${photographer.status}"></span>
+          </div>
+          <div class="ph-header-meta">
+            <div class="ph-name-row">
+              <strong class="ph-name">${escapeHtml(photographer.name)}</strong>
+              ${statusPill(photographer.status)}
+            </div>
+            <div class="ph-meta-line">
+              <span class="ph-meta-code">Mã thợ #${photographer.id}</span>
+              <span class="ph-separator">•</span>
+              <span class="ph-rating-badge">${ratingDisplay}</span>
+            </div>
+            <div class="ph-sub-loc">📍 ${escapeHtml(photographer.location || 'Chưa cập nhật')} · ⏳ ${escapeHtml(photographer.experience || 'Chưa rõ')}</div>
+          </div>
+        </div>
+
+        <div class="ph-stats-grid">
+          <div class="ph-stat-col">
+            <strong>${photographer.photoCount || 0}</strong>
+            <span>Ảnh bộ sưu tập</span>
+          </div>
+          <div class="ph-stat-col">
+            <strong>${photographer.bookingCount || 0}</strong>
+            <span>Tổng lịch nhận</span>
+          </div>
+          <div class="ph-stat-col highlight">
+            <strong>${photographer.completedBookingCount || 0}</strong>
+            <span>Buổi hoàn thành</span>
+          </div>
+        </div>
+
+        <div class="ph-info-rows">
+          <div class="ph-info-row">
+            <span class="ph-label">📧 Email:</span>
+            <span class="ph-value"><a href="mailto:${escapeHtml(photographer.email)}">${escapeHtml(photographer.email)}</a></span>
+          </div>
+          <div class="ph-info-row">
+            <span class="ph-label">📞 Điện thoại:</span>
+            <span class="ph-value"><a href="tel:${escapeHtml(photographer.phone)}"><strong>${escapeHtml(photographer.phone)}</strong></a></span>
+          </div>
+          <div class="ph-info-row">
+            <span class="ph-label">📷 Thiết bị máy:</span>
+            <span class="ph-value ph-equip-tag">${escapeHtml(photographer.equipment || 'Chưa cập nhật thiết bị')}</span>
+          </div>
+          ${specialtiesList.length ? `
+            <div class="ph-info-row">
+              <span class="ph-label">🎨 Thể loại:</span>
+              <div class="ph-tags-wrap">
+                ${specialtiesList.map(s => `<span class="ph-tag-pill">${escapeHtml(s)}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${photographer.languages ? `
+            <div class="ph-info-row">
+              <span class="ph-label">🌐 Ngôn ngữ:</span>
+              <span class="ph-value">${escapeHtml(photographer.languages)}</span>
+            </div>
+          ` : ''}
+          ${photographer.workStyle ? `
+            <div class="ph-info-row">
+              <span class="ph-label">💼 Mô hình:</span>
+              <span class="ph-value">${escapeHtml(photographer.workStyle)}</span>
+            </div>
+          ` : ''}
+          ${photographer.bio ? `
+            <div class="ph-bio-box">
+              <span class="ph-bio-icon">💬</span>
+              <p>${escapeHtml(photographer.bio)}</p>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="ph-card-footer">
+          <span class="ph-hint">💡 Rê chuột vào bảng để giữ cố định</span>
+          <button class="button-primary ph-quick-detail-btn" type="button" data-view-id="${photographer.id}">
+            🔍 Xem đầy đủ hồ sơ
+          </button>
+        </div>
+      </div>
+    `;
+
+    card.hidden = false;
+    card.setAttribute('aria-hidden', 'false');
+
+    const detailBtn = card.querySelector('[data-view-id]');
+    if (detailBtn) {
+      detailBtn.addEventListener('click', () => {
+        hideCard(true);
+        showPhotographerDetail(photographer.id);
+      });
+    }
+
+    // Định vị thông minh
+    const rect = triggerEl.getBoundingClientRect();
+    const cardWidth = 380;
+    const cardHeight = card.offsetHeight || 380;
+
+    let left = rect.left;
+    if (left + cardWidth > window.innerWidth - 16) {
+      left = Math.max(12, window.innerWidth - cardWidth - 16);
+    }
+
+    let top = rect.bottom + 8;
+    if (top + cardHeight > window.innerHeight - 10) {
+      const topAbove = rect.top - cardHeight - 8;
+      if (topAbove >= 10) {
+        top = topAbove;
+      }
+    }
+
+    card.style.left = `${Math.round(left)}px`;
+    card.style.top = `${Math.round(top)}px`;
+    card.classList.add('visible');
+  }
+
+  function hideCard(immediate = false) {
+    clearTimeout(hoverTimeout);
+    clearTimeout(closeTimeout);
+    if (immediate) {
+      card.classList.remove('visible');
+      card.hidden = true;
+      card.setAttribute('aria-hidden', 'true');
+      currentTrigger = null;
+      return;
+    }
+    closeTimeout = setTimeout(() => {
+      card.classList.remove('visible');
+      setTimeout(() => {
+        if (!card.classList.contains('visible')) {
+          card.hidden = true;
+          card.setAttribute('aria-hidden', 'true');
+          currentTrigger = null;
+        }
+      }, 150);
+    }, 120);
+  }
+
+  card.addEventListener('mouseenter', () => {
+    clearTimeout(closeTimeout);
+  });
+  card.addEventListener('mouseleave', () => {
+    hideCard();
+  });
+
+  document.addEventListener('mouseover', (e) => {
+    const trigger = e.target.closest('.photographer-hover-trigger');
+    if (!trigger) return;
+
+    const id = trigger.dataset.photographerId;
+    if (!id) return;
+
+    if (currentTrigger === trigger) {
+      clearTimeout(closeTimeout);
+      return;
+    }
+
+    currentTrigger = trigger;
+    clearTimeout(hoverTimeout);
+    clearTimeout(closeTimeout);
+
+    hoverTimeout = setTimeout(() => {
+      const photographer = (state.photographers || []).find(p => String(p.id) === String(id));
+      if (photographer) {
+        showCard(photographer, trigger);
+      }
+    }, 120);
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    const trigger = e.target.closest('.photographer-hover-trigger');
+    if (!trigger) return;
+
+    const related = e.relatedTarget;
+    if (related && (trigger.contains(related) || card.contains(related))) {
+      return;
+    }
+    hideCard();
+  });
+
+  window.addEventListener('scroll', () => {
+    if (!card.hidden && card.classList.contains('visible') && currentTrigger) {
+      const rect = currentTrigger.getBoundingClientRect();
+      const cardHeight = card.offsetHeight || 380;
+      let top = rect.bottom + 8;
+      if (top + cardHeight > window.innerHeight - 10) {
+        const topAbove = rect.top - cardHeight - 8;
+        if (topAbove >= 10) top = topAbove;
+      }
+      card.style.top = `${Math.round(top)}px`;
+    }
+  }, { passive: true });
 }
 
 async function loadBookings() {
@@ -267,4 +502,5 @@ document.getElementById('photographersTable').addEventListener('click', (event) 
   if (detailButton) showPhotographerDetail(detailButton.dataset.detailId);
 });
 
+setupPhotographerHoverCard();
 refreshData();
