@@ -43,6 +43,30 @@ io.on("connection", (socket) => {
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Tự động ghi nhận lượt truy cập (Visitor Analytics)
+const db = require("./config/db");
+app.use((req, res, next) => {
+  if (
+    req.method === "GET" &&
+    !req.path.startsWith("/api") &&
+    !req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map)$/i)
+  ) {
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
+    const userAgent = req.headers["user-agent"] || "";
+    const isMobile = /mobile|android|iphone/i.test(userAgent);
+    const isTablet = /tablet|ipad/i.test(userAgent);
+    const deviceType = isTablet ? "tablet" : (isMobile ? "mobile" : "desktop");
+    const pageUrl = req.path || "/";
+
+    db.execute(
+      "INSERT INTO visitor_logs (ip_address, user_agent, page_url, device_type) VALUES (?, ?, ?, ?)",
+      [String(ip).slice(0, 45), String(userAgent).slice(0, 255), String(pageUrl).slice(0, 255), deviceType]
+    ).catch(() => {});
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // Chỏ Route API

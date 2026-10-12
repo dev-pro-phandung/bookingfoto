@@ -167,3 +167,1078 @@ tbody tr:hover { background: #fbfdfb; }
   .blog-editor { padding: 13px; }
   .blog-table-person { min-width: 205px; }
 }
+
+/* ==========================================================================
+   ANALYTICS & TRAFFIC STYLES
+   ========================================================================== */
+
+.analytics-heading {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.analytics-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.period-toggle {
+  display: inline-flex;
+  padding: 3px;
+  background: #eef3f0;
+  border-radius: 8px;
+  border: 1px solid var(--admin-line);
+}
+
+.period-btn {
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+  color: var(--admin-ink);
+}
+
+.period-btn.active {
+  background: #fff;
+  color: var(--admin-orange);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Traffic Assessment Card */
+.traffic-assessment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff, #fafdfb);
+  border: 1px solid #cce3d8;
+  box-shadow: 0 4px 20px rgba(17, 107, 82, 0.06);
+}
+
+@media (min-width: 768px) {
+  .traffic-assessment-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .traffic-assessment-main {
+    flex: 1;
+    max-width: 60%;
+  }
+  .traffic-meter-wrap {
+    width: 320px;
+  }
+}
+
+.traffic-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.traffic-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.traffic-caption {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.traffic-level-text {
+  display: block;
+  font-family: "Manrope", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+/* Level Themes */
+.level-high {
+  background: #fff2ea;
+  border: 1px solid #ffd1ba;
+  color: #c94b16;
+}
+
+.level-good {
+  background: #e6f7f0;
+  border: 1px solid #b7ebd5;
+  color: #0b6b4a;
+}
+
+.level-medium {
+  background: #fff8e6;
+  border: 1px solid #ffe8ad;
+  color: #946300;
+}
+
+.level-low {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.traffic-description {
+  margin: 0;
+  color: #4b635b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.traffic-meter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.traffic-meter-bar {
+  height: 12px;
+  background: #e2ece7;
+  border-radius: 999px;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.meter-high {
+  background: linear-gradient(90deg, #ff914d, #e86632);
+}
+
+.meter-good {
+  background: linear-gradient(90deg, #34d399, #10b981);
+}
+
+.meter-medium {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.meter-low {
+  background: linear-gradient(90deg, #94a3b8, #64748b);
+}
+
+/* Analytics Metric Grid */
+.analytics-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .analytics-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.stat-card {
+  padding: 18px 20px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--admin-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.stat-card-title {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stat-card-icon {
+  font-size: 16px;
+}
+
+.stat-card-value {
+  font-family: "Manrope", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--admin-ink);
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+
+.stat-card-value.highlight-peak {
+  color: var(--admin-orange);
+  font-size: 22px;
+}
+
+.stat-card-sub {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.trend-up {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.trend-down {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Charts Grid */
+.analytics-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .analytics-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-box {
+  padding: 22px;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--admin-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-box-wide {
+  grid-column: 1 / -1;
+}
+
+.chart-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.chart-box-header h3 {
+  margin: 0 0 4px;
+  font-family: "Manrope", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-ink);
+}
+
+.chart-box-header p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+
+.chart-legend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.legend-dot.high {
+  background: #e86632;
+}
+
+.legend-dot.normal {
+  background: #94a3b8;
+}
+
+.chart-canvas-container {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  flex: 1;
+}
+
+.donut-container {
+  min-height: 200px;
+}
+
+/* Top Pages Ranking List */
+.top-pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.page-rank-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8faf9;
+  border: 1px solid #edf2ef;
+}
+
+.page-rank-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rank-number {
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e2ece7;
+  color: var(--admin-green);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.page-rank-info {
+  min-width: 0;
+}
+
+.page-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-url {
+  display: block;
+  font-size: 10px;
+  color: var(--admin-muted);
+}
+
+.page-rank-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  justify-content: flex-end;
+}
+
+.page-bar-wrap {
+  width: 60px;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2ece7;
+  overflow: hidden;
+}
+
+.page-bar-fill {
+  height: 100%;
+  background: var(--admin-orange);
+  border-radius: 3px;
+}
+
+.page-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-ink);
+  white-space: nowrap;
+}
+
+.page-count small {
+  font-weight: 500;
+  color: var(--admin-muted);
+}
+
+/* Device Stats Row */
+.device-stats-row {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #edf2ef;
+}
+
+.device-pill {
+  text-align: center;
+}
+
+.device-pill strong {
+  display: block;
+  font-family: "Manrope", sans-serif;
+  font-size: 16px;
+  color: var(--admin-ink);
+}
+
+.device-pill span {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+
+/* ==========================================================================
+   BẢNG LỊCH THÁNG HIỂN THỊ TO & HOVER POPOVER CHI TIẾT LỊCH CHỤP
+   ========================================================================== */
+
+.booking-main-heading {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.booking-top-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Bộ chuyển đổi chế độ xem: Bảng lịch vs Danh sách bảng */
+.booking-view-modes {
+  display: inline-flex;
+  background: #e9f0ec;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-line);
+}
+
+.view-mode-btn {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #486054;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-mode-btn:hover {
+  color: var(--admin-green);
+}
+
+.view-mode-btn.active {
+  background: #ffffff;
+  color: var(--admin-green);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Khung Bảng Lịch To */
+.booking-calendar-container {
+  margin-top: 14px;
+  background: #ffffff;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  box-shadow: var(--admin-shadow);
+  overflow: visible; /* Để popover không bị cắt */
+}
+
+/* Thanh điều khiển tháng */
+.calendar-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fafcfa;
+  border-bottom: 1px solid var(--admin-line);
+  border-radius: 12px 12px 0 0;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cal-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--admin-ink);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cal-nav-btn:hover {
+  background: var(--admin-green);
+  color: #ffffff;
+  border-color: var(--admin-green);
+}
+
+.cal-month-title {
+  margin: 0 4px;
+  font-family: "Manrope", sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--admin-ink);
+  min-width: 160px;
+  text-align: center;
+}
+
+.cal-today-btn {
+  padding: 6px 12px;
+  border: 1px solid #c9d8d0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--admin-green);
+  font-family: "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cal-today-btn:hover {
+  background: #e9f5ef;
+  border-color: var(--admin-green);
+}
+
+.calendar-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cal-summary-pill {
+  padding: 5px 12px;
+  background: #edf5f0;
+  border: 1px solid #cce2d6;
+  border-radius: 20px;
+  color: var(--admin-green);
+  font-family: "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cal-summary-pill.has-items {
+  background: rgba(23, 110, 83, 0.12);
+  color: #0f543e;
+}
+
+/* Chú thích màu sắc (Legend) */
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #556b60;
+  font-weight: 600;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.status-pending,
+.pill-dot.status-pending { background: #f59e0b; }
+.legend-dot.status-confirmed,
+.pill-dot.status-confirmed { background: #10b981; }
+.legend-dot.status-in_progress,
+.pill-dot.status-in_progress { background: #3b82f6; }
+.legend-dot.status-completed,
+.pill-dot.status-completed { background: #8b5cf6; }
+.legend-dot.status-cancelled,
+.pill-dot.status-cancelled { background: #ef4444; }
+
+/* Wrapper lưới lịch */
+.calendar-grid-wrapper {
+  overflow: visible;
+}
+
+/* Hàng thứ trong tuần */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f4f7f5;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.weekday-col {
+  padding: 12px 8px;
+  text-align: center;
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #486054;
+  letter-spacing: 0.3px;
+}
+
+.weekday-col.weekend {
+  color: #8c5b36;
+}
+
+/* Lưới các ô ngày trong tháng (Bảng to) */
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--admin-line);
+  position: relative;
+}
+
+/* Ô từng ngày trong tháng */
+.cal-day-cell {
+  position: relative;
+  background: #ffffff;
+  min-height: 115px; /* Chiều cao to rộng rãi */
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.cal-day-cell.other-month {
+  background: #fbfcfb;
+}
+
+.cal-day-cell.other-month .cal-day-number {
+  color: #a8b8b0;
+}
+
+.cal-day-cell.is-weekend {
+  background: #fdfefe;
+}
+
+.cal-day-cell.is-today {
+  background: #f3f9f6;
+}
+
+.cal-day-cell.is-today .cal-day-number {
+  background: var(--admin-green);
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+/* Ô ngày có lịch chụp: nổi bật và có thể hover */
+.cal-day-cell.has-bookings {
+  background: #f2f9f5;
+  cursor: pointer;
+}
+
+.cal-day-cell.has-bookings:hover {
+  background: #e6f4ed;
+  z-index: 35;
+  box-shadow: inset 0 0 0 2px var(--admin-green);
+}
+
+.cal-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cal-day-number {
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--admin-ink);
+}
+
+.today-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--admin-green);
+  background: rgba(23, 110, 83, 0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.booking-count-badge {
+  font-family: "Manrope", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffffff;
+  background: var(--admin-green);
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.2px;
+}
+
+.cal-day-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Các thẻ thu nhỏ sự kiện trong ô ngày */
+.cal-event-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cal-event-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 6px;
+}
+
+.pill-time {
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.pill-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
+.cal-event-pill.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.cal-event-pill.status-pending .pill-dot { background: #f59e0b; }
+
+.cal-event-pill.status-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+.cal-event-pill.status-confirmed .pill-dot { background: #10b981; }
+
+.cal-event-pill.status-in_progress {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+.cal-event-pill.status-in_progress .pill-dot { background: #3b82f6; }
+
+.cal-event-pill.status-completed {
+  background: #ede9fe;
+  color: #5b21b6;
+  border-color: #ddd6fe;
+}
+.cal-event-pill.status-completed .pill-dot { background: #8b5cf6; }
+
+.cal-event-pill.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+.cal-event-pill.status-cancelled .pill-dot { background: #ef4444; }
+
+.cal-event-more {
+  font-size: 10px;
+  color: #6b7f75;
+  font-weight: 700;
+  padding: 1px 4px;
+}
+
+/* ==========================================================================
+   BẢNG THÔNG TIN BUỔI CHỤP XỔ RA KHI HOVER VÀO NGÀY CÓ LỊCH
+   ========================================================================== */
+
+.day-popover-card {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 100;
+  width: 360px;
+  max-width: 90vw;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #c9d8d0;
+  box-shadow: 0 18px 45px rgba(19, 36, 59, 0.24), 0 4px 12px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+  cursor: default;
+  animation: popoverFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Khi hover vào ô ngày hoặc bấm focus: xổ ra bảng thông tin */
+.cal-day-cell.has-bookings:hover .day-popover-card,
+.cal-day-cell.has-bookings:focus-within .day-popover-card {
+  display: block;
+}
+
+/* Căn lề phải cho các ô ngày ở nửa bên phải lưới (Thứ 6, Thứ 7, Chủ nhật) */
+.day-popover-card.popover-align-right {
+  left: auto;
+  right: 0;
+}
+
+/* Hiển thị phía trên cho các hàng ở cuối tháng để không tràn đáy */
+.day-popover-card.popover-align-top {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header của Popover */
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #176e53 0%, #0f4e3a 100%);
+  color: #ffffff;
+  border-radius: 11px 11px 0 0;
+}
+
+.popover-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.popover-calendar-icon {
+  font-size: 20px;
+}
+
+.popover-title strong {
+  display: block;
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.popover-title small {
+  display: block;
+  font-size: 11px;
+  opacity: 0.88;
+  margin-top: 1px;
+}
+
+.popover-count-pill {
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  font-family: "Manrope", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Thân Popover chứa danh sách các buổi chụp */
+.popover-body {
+  padding: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Thẻ thông tin chi tiết từng buổi chụp */
+.popover-booking-item {
+  background: #f9fbf9;
+  border: 1px solid #e1ebe5;
+  border-radius: 9px;
+  padding: 12px;
+  border-left: 4px solid var(--admin-green);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.popover-booking-item:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.popover-booking-item.status-pending { border-left-color: #f59e0b; }
+.popover-booking-item.status-confirmed { border-left-color: #10b981; }
+.popover-booking-item.status-in_progress { border-left-color: #3b82f6; }
+.popover-booking-item.status-completed { border-left-color: #8b5cf6; }
+.popover-booking-item.status-cancelled { border-left-color: #ef4444; }
+
+.booking-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e1ebe5;
+}
+
+.item-booking-code {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--admin-ink);
+}
+
+.item-status-badge {
+  font-family: "Manrope", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.item-status-badge.status-pending { background: #fef3c7; color: #92400e; }
+.item-status-badge.status-confirmed { background: #d1fae5; color: #065f46; }
+.item-status-badge.status-in_progress { background: #dbeafe; color: #1e40af; }
+.item-status-badge.status-completed { background: #ede9fe; color: #5b21b6; }
+.item-status-badge.status-cancelled { background: #fee2e2; color: #991b1b; }
+
+.booking-item-grid {
+  display: grid;
+  gap: 5px;
+}
+
+.item-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.detail-label {
+  flex: 0 0 95px;
+  color: #60756b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.detail-value {
+  flex: 1;
+  color: var(--admin-ink);
+}
+
+.detail-sub {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.highlight-time {
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--admin-green);
+}
+
+.price-value {
+  color: var(--admin-orange);
+  font-weight: 700;
+}
+
+.notes-text {
+  font-style: italic;
+  color: #4b6156;
+  background: #f1f6f3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+@media (max-width: 900px) {
+  .calendar-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cal-day-cell {
+    min-height: 90px;
+    padding: 6px;
+  }
+  .day-popover-card {
+    width: 300px;
+  }
+}
+
+

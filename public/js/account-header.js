@@ -23,7 +23,6 @@
     const accountMenu = document.createElement('div');
     accountMenu.className = 'account-menu';
     accountMenu.setAttribute('role', 'menu');
-    accountMenu.hidden = true;
 
     const profileItem = document.createElement('a');
     profileItem.href = profileHref;
@@ -72,22 +71,25 @@
     menuWrapper.append(accountMenu);
     accountLink.setAttribute('aria-haspopup', 'menu');
     accountLink.setAttribute('aria-expanded', 'false');
+
+    // Hỗ trợ thiết bị cảm ứng khi không có con trỏ hover
     accountLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      accountMenu.hidden = !accountMenu.hidden;
-      accountLink.setAttribute('aria-expanded', String(!accountMenu.hidden));
-      if (!accountMenu.hidden) profileItem.focus();
+      if (window.matchMedia('(hover: none)').matches) {
+        event.preventDefault();
+        const isOpen = menuWrapper.classList.toggle('is-open');
+        accountLink.setAttribute('aria-expanded', String(isOpen));
+      }
     });
 
     document.addEventListener('click', (event) => {
       if (!menuWrapper.contains(event.target)) {
-        accountMenu.hidden = true;
+        menuWrapper.classList.remove('is-open');
         accountLink.setAttribute('aria-expanded', 'false');
       }
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !accountMenu.hidden) {
-        accountMenu.hidden = true;
+      if (event.key === 'Escape' && menuWrapper.classList.contains('is-open')) {
+        menuWrapper.classList.remove('is-open');
         accountLink.setAttribute('aria-expanded', 'false');
         accountLink.focus();
       }

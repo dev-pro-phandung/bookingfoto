@@ -151,6 +151,10 @@ async function loadBookings() {
       <td>${statusPill(booking.status, bookingLabels)}</td>
     </tr>
   `).join('');
+
+  if (typeof window.renderBookingCalendar === 'function') {
+    window.renderBookingCalendar(rows);
+  }
 }
 
 async function showPhotographerDetail(id) {
@@ -229,6 +233,7 @@ function setActiveView(viewId) {
   document.querySelectorAll('.admin-view').forEach((view) => { view.hidden = view.id !== viewId; });
   if (viewId === 'photographersView' && !state.photographers.length) loadPhotographers().catch((error) => setStatus(error.message));
   if (viewId === 'bookingsView') loadBookings().catch((error) => setStatus(error.message));
+  if (viewId === 'analyticsView' && typeof window.loadAnalytics === 'function') window.loadAnalytics();
 }
 
 document.getElementById('adminName').textContent = localStorage.getItem('userFullName') || 'Quản trị viên';

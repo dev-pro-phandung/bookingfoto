@@ -219,3 +219,226 @@ exports.listBookings = async (req, res) => {
     res.status(500).json({ success: false, message: "Không thể tải lịch chụp." });
   }
 };
+
+// API Thống kê lưu lượng khách truy cập (Traffic Analytics)
+exports.getAnalytics = async (req, res) => {
+  try {
+    const period = req.query.period || "7days"; // "today", "7days", "30days"
+    const daysLimit = period === "30days" ? 30 : (period === "today" ? 1 : 7);
+
+    // 1. Thống kê hôm nay
+    const [[todayRow]] = await db.execute(`
+      SELECT 
+        COUNT(*) AS todayVisits,
+        COUNT(DISTINCT COALESCE(session_id, ip_address)) AS todayUnique
+      FROM visitor_logs 
+      WHERE DATE(created_at) = CURDATE()
+    `);
+
+    // 2. Thống kê hôm qua
+    const [[yesterdayRow]] = await db.execute(`
+      SELECT 
+        COUNT(*) AS yesterdayVisits,
+        COUNT(DISTINCT COALESCE(session_id, ip_address)) AS yesterdayUnique
+      FROM visitor_logs 
+      WHERE DATE(created_at) = SUBDATE(CURDATE(), 1)
+    `);
+
+    // 3. Trung bình mỗi ngày trong 7 ngày
+    const [[avgRow]] = await db.execute(`
+      SELECT AVG(daily_count) AS avgDaily
+      FROM (
+        SELECT COUNT(*) AS daily_count 
+        FROM visitor_logs 
+        WHERE created_at >= SUBDATE(CURDATE(), 7)
+        GROUP BY DATE(created_at)
+      ) AS sub
+    `);
+
+    // 4. Lưu lượng theo 24 giờ của hôm nay
+    const [hourlyRows] = await db.execute(`
+      SELECT 
+        HOUR(created_at) AS h, 
+        COUNT(*) AS count,
+        COUNT(DISTINCT COALESCE(session_id, ip_address)) AS uniqueCount
+      FROM visitor_logs 
+      WHERE DATE(created_at) = CURDATE()
+      GROUP BY HOUR(created_at)
+      ORDER BY h ASC
+    `);
+
+    const hourlyData = Array.from({ length: 24 }, (_, hour) => {
+      const match = hourlyRows.find(r => Number(r.h) === hour);
+      return {
+        hour: `${String(hour).padStart(2, '0')}:00`,
+        hourNum: hour,
+        visits: match ? Number(match.count) : 0,
+        uniqueVisitors: match ? Number(match.uniqueCount) : 0
+      };
+    });
+
+    // Xác định khung giờ cao điểm nhất hôm nay
+    let peakHour = "19:00 - 21:00";
+    let peakCount = 0;
+    hourlyData.forEach(item => {
+      if (item.visits > peakCount) {
+        peakCount = item.visits;
+        peakHour = `${item.hour} - ${String((item.hourNum + 1) % 24).padStart(2, '0')}:00`;
+      }
+    });
+
+    // 5. Xu hướng các ngày gần nhất (theo daysLimit)
+    const [dailyRows] = await db.execute(`
+      SELECT 
+        DATE_FORMAT(created_at, '%Y-%m-%d') AS dateStr,
+        DATE_FORMAT(created_at, '%d/%m') AS displayDate,
+        DAYOFWEEK(created_at) AS dayOfWeek,
+        COUNT(*) AS visits,
+        COUNT(DISTINCT COALESCE(session_id, ip_address)) AS uniqueVisitors
+      FROM visitor_logs
+      WHERE created_at >= SUBDATE(CURDATE(), ?)
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at) ASC
+    `, [daysLimit - 1]);
+
+    const dayNames = ["", "CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const dailyTrend = dailyRows.map(r => ({
+      dateStr: r.dateStr,
+      displayDate: `${dayNames[r.dayOfWeek] || ''} (${r.displayDate})`,
+      visits: Number(r.visits),
+      uniqueVisitors: Number(r.uniqueVisitors),
+      level: Number(r.visits) >= 140 ? 'Cao' : (Number(r.visits) >= 80 ? 'Trung bình' : 'Thấp')
+    }));
+
+    // 6. Top trang truy cập nhiều nhất
+    const pageNameMap = {
+      "/": "Trang chủ Potonow",
+      "/pages/photographers.html": "Danh sách Nhiếp ảnh gia",
+      "/pages/booking.html": "Trang Đặt lịch chụp",
+      "/pages/blogs.html": "Bài viết & Cảm hứng",
+      "/pages/photographer-profile.html": "Hồ sơ chi tiết thợ ảnh",
+      "/pages/my-bookings.html": "Lịch đặt của tôi",
+      "/pages/auth.html": "Trang Đăng nhập / Đăng ký"
+    };
+
+    const [topPageRows] = await db.execute(`
+      SELECT 
+        page_url AS pageUrl,
+        COUNT(*) AS visits
+      FROM visitor_logs
+      WHERE created_at >= SUBDATE(CURDATE(), ?)
+      GROUP BY page_url
+      ORDER BY visits DESC
+      LIMIT 6
+    `, [daysLimit - 1]);
+
+    const totalPeriodVisits = topPageRows.reduce((acc, r) => acc + Number(r.visits), 0) || 1;
+    const topPages = topPageRows.map(r => ({
+      url: r.pageUrl,
+      title: pageNameMap[r.pageUrl] || r.pageUrl,
+      visits: Number(r.visits),
+      percentage: Math.round((Number(r.visits) / totalPeriodVisits) * 100)
+    }));
+
+    // 7. Thiết bị truy cập
+    const [deviceRows] = await db.execute(`
+      SELECT 
+        device_type AS deviceType,
+        COUNT(*) AS count
+      FROM visitor_logs
+      WHERE created_at >= SUBDATE(CURDATE(), ?)
+      GROUP BY device_type
+    `, [daysLimit - 1]);
+
+    const totalDevices = deviceRows.reduce((sum, r) => sum + Number(r.count), 0) || 1;
+    const deviceShare = {
+      desktop: Math.round(((deviceRows.find(r => r.deviceType === 'desktop')?.count || 0) / totalDevices) * 100),
+      mobile: Math.round(((deviceRows.find(r => r.deviceType === 'mobile')?.count || 0) / totalDevices) * 100),
+      tablet: Math.round(((deviceRows.find(r => r.deviceType === 'tablet')?.count || 0) / totalDevices) * 100),
+    };
+
+    // Đánh giá mức độ lưu lượng (Nhiều hay Ít)
+    const todayCount = Number(todayRow?.todayVisits || 0);
+    const yesterdayCount = Number(yesterdayRow?.yesterdayVisits || 0);
+    const avgCount = Number(avgRow?.avgDaily || 100);
+
+    const periodTotalVisits = dailyTrend.reduce((acc, d) => acc + d.visits, 0);
+    const periodDailyAvg = dailyTrend.length ? Math.round(periodTotalVisits / dailyTrend.length) : Math.round(avgCount);
+
+    let trafficLevel = "ỔN ĐỊNH";
+    let trafficBadge = "medium";
+    let trafficIcon = "⚡";
+    let assessmentText = "Lưu lượng khách truy cập ở mức ổn định.";
+
+    if (period === "today") {
+      const currentHour = new Date().getHours();
+      const hoursElapsed = Math.max(1, currentHour + 1);
+      const projectedVisits = Math.round((todayCount / hoursElapsed) * 24);
+
+      if (projectedVisits >= 140 || (yesterdayCount > 0 && todayCount >= yesterdayCount * 1.15)) {
+        trafficLevel = "RẤT CAO 🚀";
+        trafficBadge = "high";
+        trafficIcon = "🚀";
+        assessmentText = `Hôm nay lượng khách truy cập RẤT CAO (${todayCount} lượt đến hiện tại, ước tính ~${projectedVisits} lượt cả ngày). Khách hàng tìm kiếm thợ chụp ảnh rất sôi nổi.`;
+      } else if (projectedVisits >= 80) {
+        trafficLevel = "KHÁ ĐÔNG & ỔN ĐỊNH 📈";
+        trafficBadge = "good";
+        trafficIcon = "📈";
+        assessmentText = `Lượng khách hôm nay DUY TRÌ ỔN ĐỊNH (${todayCount} lượt tính đến hiện tại). Tỷ lệ xem dịch vụ chụp ảnh đồng đều qua các khung giờ.`;
+      } else {
+        trafficLevel = "THẤP / ÍT KHÁCH 💤";
+        trafficBadge = "low";
+        trafficIcon = "💤";
+        assessmentText = `Lượng khách hôm nay đang THẤP (${todayCount} lượt). Phù hợp để đăng thêm bài viết mới hoặc tạo gói chụp ưu đãi kích cầu.`;
+      }
+    } else {
+      // Đánh giá theo 7 ngày hoặc 30 ngày
+      if (periodDailyAvg >= 130) {
+        trafficLevel = "RẤT CAO (ĐÔNG KHÁCH) 🚀";
+        trafficBadge = "high";
+        trafficIcon = "🚀";
+        assessmentText = `Lưu lượng ${daysLimit} ngày qua ĐẠT MỨC CAO với trung bình ~${periodDailyAvg} lượt truy cập/ngày (tổng ${new Intl.NumberFormat('vi-VN').format(periodTotalVisits)} lượt). Nhu cầu tìm thợ và book lịch đang tăng mạnh!`;
+      } else if (periodDailyAvg >= 75) {
+        trafficLevel = "TỐT & ỔN ĐỊNH 📈";
+        trafficBadge = "good";
+        trafficIcon = "📈";
+        assessmentText = `Lưu lượng ${daysLimit} ngày qua DUY TRÌ ỔN ĐỊNH với trung bình ~${periodDailyAvg} lượt truy cập/ngày (tổng ${new Intl.NumberFormat('vi-VN').format(periodTotalVisits)} lượt). Nền tảng hoạt động hiệu quả.`;
+      } else {
+        trafficLevel = "THẤP / CẦN THÚC ĐẨY 💤";
+        trafficBadge = "low";
+        trafficIcon = "💤";
+        assessmentText = `Lưu lượng ${daysLimit} ngày qua ở mức THẤP (trung bình ~${periodDailyAvg} lượt/ngày). Lượng khách ghé thăm còn ít, cần đẩy mạnh quảng bá dịch vụ.`;
+      }
+    }
+
+    const growthPercent = yesterdayCount > 0 
+      ? Math.round(((todayCount - yesterdayCount) / yesterdayCount) * 100) 
+      : 0;
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          todayVisits: todayCount,
+          todayUnique: Number(todayRow?.todayUnique || 0),
+          yesterdayVisits: yesterdayCount,
+          growthPercent,
+          trafficLevel,
+          trafficBadge,
+          trafficIcon,
+          assessmentText,
+          peakHour,
+          peakCount,
+          periodDays: daysLimit,
+        },
+        hourlyData,
+        dailyTrend,
+        topPages,
+        deviceShare
+      }
+    });
+  } catch (error) {
+    console.error("Lỗi lấy dữ liệu thống kê lưu lượng:", error);
+    res.status(500).json({ success: false, message: "Không thể tải dữ liệu thống kê." });
+  }
+};

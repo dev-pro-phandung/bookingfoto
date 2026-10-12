@@ -34,6 +34,7 @@
         <button class="admin-tab" type="button" data-view="photographersView">Tài khoản thợ</button>
         <button class="admin-tab" type="button" data-view="bookingsView">Lịch chụp</button>
         <button class="admin-tab" type="button" data-view="blogsView">Bài viết</button>
+        <button class="admin-tab" type="button" data-view="analyticsView">📊 Thông số lưu lượng</button>
       </nav>
 
       <section id="reviewsView" class="admin-view">
@@ -50,11 +51,81 @@
       </section>
 
       <section id="bookingsView" class="admin-view" hidden>
-        <div class="section-heading"><div><h2>Lịch chụp của thợ</h2><p>Xem lịch theo ngày, khách hàng, gói chụp và trạng thái.</p></div>
-          <div class="booking-filters"><label class="filter-control"><span>Nhiếp ảnh gia</span><select id="bookingPhotographerFilter"><option value="">Tất cả thợ</option></select></label><label class="filter-control"><span>Trạng thái</span><select id="bookingStatusFilter"><option value="">Tất cả</option><option value="pending">Chờ xác nhận</option><option value="confirmed">Đã xác nhận</option><option value="in_progress">Đang chụp</option><option value="completed">Hoàn thành</option><option value="cancelled">Đã hủy</option></select></label></div>
+        <div class="section-heading booking-main-heading">
+          <div>
+            <h2>Lịch chụp của thợ</h2>
+            <p>Xem lịch theo ngày, khách hàng, gói chụp và trạng thái.</p>
+          </div>
+          <div class="booking-top-controls">
+            <!-- Chuyển đổi giữa Chế độ Lịch tháng to & Bảng danh sách -->
+            <div class="booking-view-modes" role="radiogroup" aria-label="Chế độ hiển thị lịch">
+              <button id="viewCalendarBtn" class="view-mode-btn active" type="button" data-mode="calendar">📅 Bảng lịch tháng</button>
+              <button id="viewTableBtn" class="view-mode-btn" type="button" data-mode="table">📋 Danh sách chi tiết</button>
+            </div>
+            <div class="booking-filters">
+              <label class="filter-control"><span>Nhiếp ảnh gia</span><select id="bookingPhotographerFilter"><option value="">Tất cả thợ</option></select></label>
+              <label class="filter-control"><span>Trạng thái</span><select id="bookingStatusFilter"><option value="">Tất cả</option><option value="pending">Chờ xác nhận</option><option value="confirmed">Đã xác nhận</option><option value="in_progress">Đang chụp</option><option value="completed">Hoàn thành</option><option value="cancelled">Đã hủy</option></select></label>
+            </div>
+          </div>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>Ngày / giờ</th><th>Mã lịch</th><th>Nhiếp ảnh gia</th><th>Khách hàng</th><th>Gói chụp</th><th>Địa điểm</th><th>Trạng thái</th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
-        <p id="bookingsEmpty" class="empty-state" hidden>Chưa có lịch chụp phù hợp.</p>
+
+        <!-- BẢNG LỊCH THÁNG HIỂN THỊ TO (BIG CALENDAR VIEW) -->
+        <div id="bookingCalendarContainer" class="booking-calendar-container">
+          <div class="calendar-top-bar">
+            <div class="calendar-nav">
+              <button id="calPrevMonth" class="cal-nav-btn" type="button" title="Tháng trước">◀</button>
+              <h3 id="calMonthDisplay" class="cal-month-title">Tháng 10 / 2026</h3>
+              <button id="calNextMonth" class="cal-nav-btn" type="button" title="Tháng sau">▶</button>
+              <button id="calTodayBtn" class="cal-today-btn" type="button">Hôm nay</button>
+            </div>
+            <div class="calendar-meta-info">
+              <span id="calTotalMonthBookings" class="cal-summary-pill">0 buổi chụp trong tháng</span>
+              <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-dot status-pending"></span>Chờ xác nhận</span>
+                <span class="legend-item"><span class="legend-dot status-confirmed"></span>Đã xác nhận</span>
+                <span class="legend-item"><span class="legend-dot status-in_progress"></span>Đang chụp</span>
+                <span class="legend-item"><span class="legend-dot status-completed"></span>Hoàn thành</span>
+                <span class="legend-item"><span class="legend-dot status-cancelled"></span>Đã hủy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar-grid-wrapper">
+            <div class="calendar-weekdays">
+              <div class="weekday-col">Thứ 2</div>
+              <div class="weekday-col">Thứ 3</div>
+              <div class="weekday-col">Thứ 4</div>
+              <div class="weekday-col">Thứ 5</div>
+              <div class="weekday-col">Thứ 6</div>
+              <div class="weekday-col">Thứ 7</div>
+              <div class="weekday-col weekend">Chủ nhật</div>
+            </div>
+            <div id="calendarDaysGrid" class="calendar-days-grid" aria-label="Lưới ngày trong tháng">
+              <!-- Render động bởi admin-calendar.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- BẢNG DANH SÁCH CHI TIẾT (TABLE VIEW) -->
+        <div id="bookingTableContainer" class="booking-table-container" hidden>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ngày / giờ</th>
+                  <th>Mã lịch</th>
+                  <th>Nhiếp ảnh gia</th>
+                  <th>Khách hàng</th>
+                  <th>Gói chụp</th>
+                  <th>Địa điểm</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTable"></tbody>
+            </table>
+          </div>
+          <p id="bookingsEmpty" class="empty-state" hidden>Chưa có lịch chụp phù hợp.</p>
+        </div>
       </section>
 
       <section id="blogsView" class="admin-view" hidden>
@@ -78,6 +149,149 @@
         <p id="blogsEmpty" class="empty-state" hidden>Chưa có bài viết.</p>
       </section>
 
+      <!-- TAB THỐNG KÊ LƯU LƯỢNG TRUY CẬP (ANALYTICS & TRAFFIC) -->
+      <section id="analyticsView" class="admin-view" hidden>
+        <div class="section-heading analytics-heading">
+          <div>
+            <h2>Thông số & Lưu lượng truy cập</h2>
+            <p>Phân tích mức độ khách ghé thăm nhiều hay ít, theo dõi các khung giờ cao điểm và xu hướng khách hàng.</p>
+          </div>
+          <div class="analytics-toolbar">
+            <div class="period-toggle" role="radiogroup" aria-label="Chọn khoảng thời gian">
+              <button class="period-btn" type="button" data-period="today">Hôm nay</button>
+              <button class="period-btn active" type="button" data-period="7days">7 ngày qua</button>
+              <button class="period-btn" type="button" data-period="30days">30 ngày qua</button>
+            </div>
+            <button id="refreshAnalyticsBtn" class="button-secondary" type="button">↻ Làm mới số liệu</button>
+          </div>
+        </div>
+
+        <!-- Banner Đánh giá Mức độ Lưu lượng (Nhiều hay Ít) -->
+        <div class="traffic-assessment-card" id="trafficAssessmentCard">
+          <div class="traffic-assessment-main">
+            <div class="traffic-level-badge" id="trafficLevelBadge">
+              <span class="traffic-icon" id="trafficIcon">🚀</span>
+              <div>
+                <span class="traffic-caption">Đánh giá lưu lượng truy cập:</span>
+                <strong class="traffic-level-text" id="trafficLevelText">ĐANG PHÂN TÍCH...</strong>
+              </div>
+            </div>
+            <p class="traffic-description" id="trafficAssessmentDesc">
+              Hệ thống đang tổng hợp dữ liệu lượt truy cập...
+            </p>
+          </div>
+          <div class="traffic-meter-wrap">
+            <div class="meter-labels">
+              <span>Ít khách 💤</span>
+              <span>Ổn định ⚡</span>
+              <span>Rất đông khách 🚀</span>
+            </div>
+            <div class="traffic-meter-bar">
+              <div class="meter-fill" id="trafficMeterFill" style="width: 75%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thẻ thống kê 4 chỉ số chính -->
+        <div class="analytics-metric-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tổng lượt truy cập</span>
+              <span class="stat-card-icon">👁</span>
+            </div>
+            <div class="stat-card-value" id="statTotalVisits">—</div>
+            <div class="stat-card-sub" id="statVisitsGrowth">So với ngày hôm qua</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Khách riêng biệt (Unique)</span>
+              <span class="stat-card-icon">👥</span>
+            </div>
+            <div class="stat-card-value" id="statUniqueVisitors">—</div>
+            <div class="stat-card-sub" id="statUniqueSub">Khách truy cập duy nhất</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Khung giờ cao điểm nhất</span>
+              <span class="stat-card-icon">⏰</span>
+            </div>
+            <div class="stat-card-value highlight-peak" id="statPeakHour">—</div>
+            <div class="stat-card-sub" id="statPeakSub">Thời điểm đông khách nhất</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Mức độ hoạt động</span>
+              <span class="stat-card-icon">📊</span>
+            </div>
+            <div class="stat-card-value" id="statTrafficRate">—</div>
+            <div class="stat-card-sub" id="statTrafficRateSub">Đánh giá dựa trên trung bình tuần</div>
+          </div>
+        </div>
+
+        <!-- Khu vực các Biểu đồ (Charts) -->
+        <div class="analytics-charts-grid">
+          <!-- Biểu đồ 1: Đường cong lưu lượng 24h trong ngày (Nhìn rõ giờ cao điểm / thấp điểm) -->
+          <div class="chart-box chart-box-wide">
+            <div class="chart-box-header">
+              <div>
+                <h3>Biểu đồ lưu lượng 24 khung giờ trong ngày</h3>
+                <p>Nhận biết trực quan khung giờ đông khách nhất (chiều tối) và khung giờ vắng khách (đêm - sáng sớm).</p>
+              </div>
+              <div class="chart-legend-badge">
+                <span class="legend-dot high"></span> Giờ cao điểm
+                <span class="legend-dot normal"></span> Giờ bình thường
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="hourlyChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Biểu đồ 2: Cột xu hướng các ngày trong tuần -->
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <div>
+                <h3>Xu hướng khách ghé thăm theo ngày</h3>
+                <p>So sánh số lượt truy cập giữa các ngày trong tuần.</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="dailyTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Biểu đồ 3: Top trang được xem nhiều nhất -->
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <div>
+                <h3>Top trang được quan tâm nhiều nhất</h3>
+                <p>Khu vực khách hàng xem nhiều nhất trên website.</p>
+              </div>
+            </div>
+            <div class="top-pages-list" id="topPagesList">
+              <div class="loading-placeholder">Đang tải danh sách trang...</div>
+            </div>
+          </div>
+
+          <!-- Biểu đồ 4: Thiết bị khách hàng sử dụng -->
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <div>
+                <h3>Thiết bị khách hàng sử dụng</h3>
+                <p>Tỷ lệ giữa Máy tính (Desktop) và Điện thoại (Mobile).</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container donut-container">
+              <canvas id="deviceChart"></canvas>
+            </div>
+            <div class="device-stats-row" id="deviceStatsRow"></div>
+          </div>
+        </div>
+      </section>
+
       <p id="adminStatus" class="admin-status" role="status" aria-live="polite"></p>
     </main>
 
@@ -85,7 +299,11 @@
       <form method="dialog"><button class="dialog-close" aria-label="Đóng">×</button></form>
       <div id="photographerDetail"></div>
     </dialog>
+    <!-- Chart.js thư viện biểu đồ trực quan -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/admin.js"></script>
     <script src="/js/admin-blogs.js"></script>
+    <script src="/js/admin-analytics.js"></script>
+    <script src="/js/admin-calendar.js"></script>
   </body>
 </html>

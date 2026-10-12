@@ -6,6 +6,7 @@ const requireAdmin = require("../middleware/requireAdmin");
 const router = express.Router();
 router.use(requireAdmin);
 router.get("/dashboard", adminController.getDashboard);
+router.get("/analytics", adminController.getAnalytics);
 router.get("/photographers", adminController.listPhotographers);
 router.get("/photographers/:id", adminController.getPhotographer);
 router.patch("/photographers/:id/status", adminController.updatePhotographerStatus);
